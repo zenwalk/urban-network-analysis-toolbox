@@ -83,7 +83,6 @@ def trim(field_name):
 
 """
 Computes the euclidean distance between |loc1| and |loc2|
-
 |loc1|: (x1, y1)
 |loc2|: (x2, y2)
 """

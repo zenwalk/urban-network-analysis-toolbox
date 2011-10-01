@@ -6,7 +6,6 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
-from math import sqrt
 from sys import maxint
 
 """

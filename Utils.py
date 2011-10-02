@@ -72,7 +72,13 @@ class Progress_Bar:
 Returns True if |a| and |b| are within |TOLERANCE|
 """
 def eq_TOL(a, b):
-  return abs(a, b) < TOLERANCE
+  return abs(a, b) <= TOLERANCE
+
+"""
+Returns True if |a| is less than |b| by more than |TOLERANCE|
+"""
+def lt_TOL(a, b):
+  return b - a > TOLERANCE
 
 """
 Returns the first 10 characters of |field_name|

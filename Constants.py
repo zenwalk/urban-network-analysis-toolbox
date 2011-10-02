@@ -19,6 +19,22 @@ STEP_5 = "Writing out results"
 STEP_6 = "Displaying results"
 
 """
+Node attribute names
+"""
+location = "location"
+weight = "weight"
+reach = "reach"
+norm_reach = "norm_reach"
+gravity = "gravity_type_index"
+norm_gravity = "norm_gravity_type_index"
+betweenness = "betweenness"
+norm_betweenness = "norm_betweenness"
+closeness = "closeness"
+norm_closeness = "norm_closeness"
+straightness = "straightness"
+norm_straightness = "norm_straightness"
+
+"""
 Constants for adjacency list computation
 """
 # High cost assigned to buildings to stop neighbor search when a building is encountered

@@ -24,11 +24,11 @@ class Node:
     Add a neighbor to this node
     |neighbor_id|: id of the neighboring node
     |edge_weight|: weight of the edge connecting the two nodes
-    |accumulation_weights|: weight of the edge based on other metrics
+    |accumulation_weights|: the weight of the edge based on other metrics
     """
     def add_neighbor(self, neighbor_id, edge_weight=1.0, accumulation_weights={}):
       if not neighbor_id in self.neighbor_ids:
         self.neighbor_ids.add(neighbor_id)
         self.neighbors.append((neighbor_id,
                                edge_weight,
-                               accumulation_weights))
+                               tuple(accumulation_weights.items())))

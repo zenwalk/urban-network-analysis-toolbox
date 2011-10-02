@@ -105,7 +105,7 @@ def compute_centrality(nodes,
           if d_sw <= radius:
             heapq.heappush(Q, (d_sw, w)) # Add w to |Q|
             if have_accumulations:
-              accumulations_s[w] = merge_maps(accumulations_s[v], accumulations_vw, add)
+              accumulations_s[w] = merge_maps(accumulations_s[v], dict(accumulations_vw), add)
           d[w] = d_sw
           if compute_b: b_refresh = True
 
@@ -116,7 +116,7 @@ def compute_centrality(nodes,
               heapq.heapify(Q)
             heapq.heappush(Q, (d_sw, w)) # Add w to |Q|
             if have_accumulations:
-              accumulations_s[w] = merge_maps(accumulations_s[v], accumulations_vw, add)
+              accumulations_s[w] = merge_maps(accumulations_s[v], dict(accumulations_vw), add)
           d[w] = d_sw
           if compute_b: b_refresh = True
 

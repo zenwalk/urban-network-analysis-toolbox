@@ -71,13 +71,13 @@ class Progress_Bar:
 """
 Returns True if |a| and |b| are within |TOLERANCE|
 """
-def eq_TOL(a, b):
+def eq_tol(a, b):
   return abs(a, b) <= TOLERANCE
 
 """
 Returns True if |a| is less than |b| by more than |TOLERANCE|
 """
-def lt_TOL(a, b):
+def lt_tol(a, b):
   return b - a > TOLERANCE
 
 """

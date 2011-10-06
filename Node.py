@@ -6,7 +6,7 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
-from Constants import weight_attribute
+from Constants import WEIGHT
 
 """
 Representation for a node in a graph
@@ -18,7 +18,7 @@ class Node:
     self.neighbor_ids = set()
     self.neighbors = []
     # The weight of the node, defaults to 1.0 but can be changed
-    setattr(self, weight_attribute, 1.0)
+    setattr(self, WEIGHT, 1.0)
 
     """
     Add a neighbor to this node

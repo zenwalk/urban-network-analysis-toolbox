@@ -40,14 +40,14 @@ def compute_centrality(nodes,
 
   # Preprocessing
   have_accumulations = len(accumulator_fields) > 0
-  have_locations = hasattr(nodes.values()[0], location)
+  have_locations = hasattr(nodes.values()[0], LOCATION)
   if compute_s and not have_locations:
     # We cannot compute straightness without node locations
     compute_s = False
   if compute_b:
     # Initialize betweenness values
     for id in nodes:
-      setattr(nodes[id], betweenness, 0.0)
+      setattr(nodes[id], BETWEENNESS, 0.0)
   
   # Initialize the sum of all node weights (normalization)
   sum_weights = 0.0
@@ -55,8 +55,8 @@ def compute_centrality(nodes,
   # Computation
   progress = Progress_Bar(N, 1, STEP_4)
   for s in nodes:
-    weight_s = getattr(nodes[s], weight)
-    if have_locations: location_s = getattr(nodes[s], location)
+    weight_s = getattr(nodes[s], WEIGHT)
+    if have_locations: location_s = getattr(nodes[s], LOCATION)
 
     sum_weights += weight_s
 
@@ -84,8 +84,8 @@ def compute_centrality(nodes,
     while Q:
       # Pop the closest node to |s| from |Q|
       d_sv, v = heapq.heappop(Q)
-      weight_v = getattr(nodes[v], weight)
-      if have_locations: location_v = getattr(nodes[v], location)
+      weight_v = getattr(nodes[v], WEIGHT)
+      if have_locations: location_v = getattr(nodes[v], LOCATION)
 
       reach_s += 1
       weighted_reach_s += weight_v
@@ -104,18 +104,18 @@ def compute_centrality(nodes,
 
         if not w in d: # Found a path from |s| to |w| for the first time
           if d_sw <= radius:
-            heapq.heappush(Q, (d_sw, w)) # Add w to |Q|
+            heapq.heappush(Q, (d_sw, w)) # Add |w| to |Q|
             if have_accumulations:
               accumulations_s[w] = merge_maps(accumulations_s[v], dict(accumulations_vw), add)
           d[w] = d_sw
           if compute_b: b_refresh = True
 
-        elif lt_TOL(d_sw, d[w]): # Found a better path from |s| to |w|
+        elif lt_tol(d_sw, d[w]): # Found a better path from |s| to |w|
           if d_sw <= radius:
             if d[w] <= radius:
               Q.remove((d[w], w))
               heapq.heapify(Q)
-            heapq.heappush(Q, (d_sw, w)) # Add w to |Q|
+            heapq.heappush(Q, (d_sw, w)) # Add |w| to |Q|
             if have_accumulations:
               accumulations_s[w] = merge_maps(accumulations_s[v], dict(accumulations_vw), add)
           d[w] = d_sw
@@ -125,13 +125,13 @@ def compute_centrality(nodes,
           if b_refresh:
             sigma[w] = 0.0
             P[w] = []
-          if eq_TOL(d_sw, d[w]): # Count all shortest paths from |s| to |w|
+          if eq_tol(d_sw, d[w]): # Count all shortest paths from |s| to |w|
             sigma[w] += sigma[v] # Update the number of shortest paths
             P[w].append(v) # |v| is a predecessor of |w|
             delta[v] = 0.0 # Recognize |v| as a predecessor
 
-    if compute_r: setattr(nodes[s], reach, weighted_reach_s)
-    if compute_g: setattr(nodes[s], gravity, gravity_s)
+    if compute_r: setattr(nodes[s], REACH, weighted_reach_s)
+    if compute_g: setattr(nodes[s], GRAVITY, gravity_s)
     if compute_b:
       while S: # Revisit nodes in reverse order of distance from |s|
         w = S.pop()
@@ -139,10 +139,10 @@ def compute_centrality(nodes,
         for v in P[w]:
           delta[v] += sigma[v] / sigma[w] * (1 + delta_w)
         if w != s:
-          between_w = getattr(w, betweenness)
-          setattr(nodes[w], betweenness, between_w + delta_w * weight_s)
-    if compute_c: setattr(nodes[s], closeness, 1 / d_sum_s if d_sum_s > 0 else 0.0)
-    if compute_s: setattr(nodes[s], straightness, straightness_s)
+          between_w = getattr(w, BETWEENNESS)
+          setattr(nodes[w], BETWEENNESS, between_w + delta_w * weight_s)
+    if compute_c: setattr(nodes[s], CLOSENESS, 1 / d_sum_s if d_sum_s > 0 else 0.0)
+    if compute_s: setattr(nodes[s], STRAIGHTNESS, straightness_s)
 
     nodes[s].reach = reach_s
     nodes[s].weighted_reach = weighted_reach_s
@@ -158,39 +158,39 @@ def compute_centrality(nodes,
 
   # Normalization
   if measures_to_normalize:
-    norm_progress = Progress_Bar(N, 1, "Normalizing results")
+    norm_progress = Progress_Bar(N, 1, PROGRESS_NORMALIZATION)
     for s in nodes:
-      reach_s = getattr(nodes[s], "reach")
-      weighted_reach_s = getattr(nodes[s], "weighted_reach")
+      reach_s = nodes[s].reach
+      weighted_reach_s = nodes[s].weighted_reach)
 
       # Normalize reach
-      if compute_r and reach in measures_to_normalize:
-        weight_s = getattr(nodes[s], weight)
-        try: setattr(nodes[s], norm_reach, (reach_s + weight_s) / sum_weights
-        except: setattr(nodes[s], reach_norm, 0.0)
+      if compute_r and REACH in measures_to_normalize:
+        weight_s = getattr(nodes[s], WEIGHT)
+        try: setattr(nodes[s], NORM_REACH, (reach_s + weight_s) / sum_weights
+        except: setattr(nodes[s], NORM_REACH, 0.0)
 
       # Normalize gravity
-      if compute_g and gravity in measures_to_normalize:
-        gravity_s = getattr(nodes[s], gravity)
-        try: setattr(nodes[s], norm_gravity, gravity_s / weighted_reach_s)
-        except: setattr(nodes[s], norm_gravity, 0.0)
+      if compute_g and GRAVITY in measures_to_normalize:
+        gravity_s = getattr(nodes[s], GRAVITY)
+        try: setattr(nodes[s], NORM_GRAVITY, gravity_s / weighted_reach_s)
+        except: setattr(nodes[s], NORM_GRAVITY, 0.0)
 
       # Normalize betweenness
-      if compute_b and betweenness in measures_to_normalize:
-        betweenness_s = getattr(nodes[s], betweenness)
-        try: setattr(nodes[s], norm_betweenness, betweenness_s / (weighted_reach_s * (reach_s - 1)))
-        except: setattr(nodes[s], norm_betweenness, 0.0)
+      if compute_b and BETWEENNESS in measures_to_normalize:
+        betweenness_s = getattr(nodes[s], BETWEENNESS)
+        try: setattr(nodes[s], NORM_BETWEENNESS, betweenness_s / (weighted_reach_s * (reach_s - 1)))
+        except: setattr(nodes[s], NORM_BETWEENNESS, 0.0)
 
       # Normalize closeness
-      if compute_c and closeness in measures_to_normalize:
-        closeness_s = getattr(nodes[s], closeness)
-        try: setattr(nodes[s], norm_closeness, closeness_s * weighted_reach_s)
-        except: setattr(nodes[s], norm_closeness, 0.0)
+      if compute_c and CLOSENESS in measures_to_normalize:
+        closeness_s = getattr(nodes[s], CLOSENESS)
+        try: setattr(nodes[s], NORM_CLOSENESS, closeness_s * weighted_reach_s)
+        except: setattr(nodes[s], NORM_CLOSENESS, 0.0)
 
       # Normalize straightness
-      if compute_s and straightness in measures_to_normalize:
-        straightness_s = getattr(nodes[s], straightness)
-        try: setattr(nodes[s], norm_straightness, straightness_s / weighted_reach_s)
-        except: setattr(nodes[s], norm_straightness, 0.0)
+      if compute_s and STRAIGHTNESS in measures_to_normalize:
+        straightness_s = getattr(nodes[s], STRAIGHTNESS)
+        try: setattr(nodes[s], NORM_STRAIGHTNESS, straightness_s / weighted_reach_s)
+        except: setattr(nodes[s], NORM_STRAIGHTNESS, 0.0)
 
       norm_progress.step()

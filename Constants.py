@@ -34,48 +34,52 @@ NODE_WEIGHT_ATTRIBUTE = "Node Weight Attribute Name"
 IMPEDANCE_ATTRIBUTE = "Impedance Attribute Name"
 SEARCH_RADIUS = "Search Radius"
 MAX_NEIGHBOR_SEPARATION = "Maximum Neighbor Separation"
-BETA = "beta"
+BETA = "Beta"
 NORMALIZE_RESULTS = "Normalize Results"
 OUTPUT_LOCATION = "Output Location"
 OUTPUT_FILE_NAME = "Output File Name"
-ACCUMULATOR_ATTRIBUTES = "Accumulators"
+ACCUMULATOR_ATTRIBUTES = "Accumulator Attributes"
 
 """
 Console messages
 """
 PROGRESS_NORMALIZATION = "Normalizing Results"
+
 WARNING_NO_EDGE_FEATURE = lambda input_network: input_network + " does not have edge feature"
 WARNING_NO_JUNCTION_FEATURE = lambda input_network: input_network + " does not have junction feature"
-WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: not_in_graph + " out of " + \
+WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: str(not_in_graph) + " out of " + \
                               str(in_graph + not_in_graph) + " input points not recorded in graph"
 WARNING_NO_NODES = "No nodes in graph"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
+
 BARRIER_COST_PRE_PROCESSING = "Barrier cost computation pre-processing"
 BARRIER_COST_COMPUTATION = "Barrier cost computation"
-ADJACENCY_LIST_COMPUTED = ""
+
+ADJACENCY_LIST_COMPUTED = "Adjacency list already computed on previous run"
+
 CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
-STEP_1_STARTED = ""
-STEP_1_FAILED = ""
-STEP_1_FINISHED = ""
-STEP_2_STARTED = ""
-STEP_2_FAILED = ""
-STEP_2_FINISHED = ""
-STEP_3_STARTED = ""
-STEP_3_FAILED = ""
-STEP_3_FINISHED = ""
-STEP_4_STARTED = ""
-STEP_4_FAILED = ""
-STEP_4_FINISHED = ""
-STEP_5_STARTED = ""
-STEP_5_FAILED = ""
-STEP_5_FINISHED = ""
-STEP_6_STARTED = ""
-STEP_6_FAILED = ""
-STEP_6_FINISHED = ""
-CLEANUP_STARTED = ""
-CLEANUP_FAILED = ""
-CLEANUP_FINISHED = ""
+STEP_1_STARTED = "[1 started] " + STEP_1
+STEP_1_FAILED = "[1 failed] "
+STEP_1_FINISHED = "[1 finished]"
+STEP_2_STARTED = "[2 started] " + STEP_2
+STEP_2_FAILED = "[2 failed]"
+STEP_2_FINISHED = "[2 finished]"
+STEP_3_STARTED = "[3 started] " + STEP_3
+STEP_3_FAILED = "[3 failed]"
+STEP_3_FINISHED = "[3 finished]"
+STEP_4_STARTED = "[4 started] " + STEP_4
+STEP_4_FAILED = "[4 failed]"
+STEP_4_FINISHED = "[4 finished]"
+STEP_5_STARTED = "[5 started] " + STEP_5
+STEP_5_FAILED = "[5 failed]"
+STEP_5_FINISHED = "[5 finished]"
+STEP_6_STARTED = "[6 started]" + STEP_6
+STEP_6_FAILED = "[6 failed]"
+STEP_6_FINISHED = "[6 finished]"
+CLEANUP_STARTED = "... [started] Clean up"
+CLEANUP_FAILED = "... [failed]"
+CLEANUP_FINISHED = "... [finished]"
 SUCCESS = "Successful!"
 FAILURE = "Not successful"
 

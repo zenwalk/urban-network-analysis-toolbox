@@ -10,14 +10,13 @@ from Constants import WEIGHT
 
 """
 Representation for a node in a graph
-A graph is represented by a dictionary mapping node id's to Node objects
+A graph is represented by a dictionary mapping node id's to |Node| objects
 """
 class Node:
   def __init__(self):
-    # The node's neighboring nodes
-    self.neighbor_ids = set()
-    self.neighbors = []
-    # The weight of the node, defaults to 1.0 but can be changed
+    # Neighboring nodes
+    self.neighbors = set()
+    # Weight of the node, defaults to 1.0 but can be changed
     setattr(self, WEIGHT, 1.0)
 
     """
@@ -27,8 +26,6 @@ class Node:
     |accumulation_weights|: the weight of the edge based on other metrics
     """
     def add_neighbor(self, neighbor_id, edge_weight=1.0, accumulation_weights={}):
-      if not neighbor_id in self.neighbor_ids:
-        self.neighbor_ids.add(neighbor_id)
-        self.neighbors.append((neighbor_id,
-                               edge_weight,
-                               tuple(accumulation_weights.items())))
+      self.neighbors.add((neighbor_id,
+                          edge_weight,
+                          tuple(accumulation_weights.items())))

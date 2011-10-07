@@ -59,7 +59,9 @@ ADJACENCY_LIST_COMPUTED = "Adjacency list already computed on previous run"
 
 CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
-STEP_1_STARTED = "[1 started] " + STEP_1
+BARRIER_COST_COMPUTATION_STARTED = "... [started] Computing barrier costs"
+BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
+SSTEP_1_STARTED = "[1 started] " + STEP_1
 STEP_1_FAILED = "[1 failed] "
 STEP_1_FINISHED = "[1 finished]"
 STEP_2_STARTED = "[2 started] " + STEP_2

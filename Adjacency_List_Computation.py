@@ -15,15 +15,15 @@ from os.path import join
 arcpy.env.overwriteOutput = True # Enable overwriting
 
 """
-|input_points|:
-|input_network|:
-|id_attribute|:
-|impedance_attribute|:
-|accumulator_attributes|:
-|search_radius|:
-|max_neighbor_separation|:
-|output_location|:
-|adj_dbf_name|:
+|input_points|: point shape file marking entity (e.g. building) locations
+|input_network|: street network in which |input_points| is located
+|id_attribute|: the name of attribute that distinguishes between input points
+|impedance_attribute|: distance between neighboring nodes will be based on this attribute
+|accumulator_attributes|: distance between neighboring nodes will also be recorded for these attributes
+|search_radius|: the maximum extent for centrality computation
+|max_neighbor_separation|: the maximum extent for neighbor search
+|output_location|: adjacency list dbf will be saved here
+|adj_dbf_name|: the name of the adjacency list dbf
 """
 def compute_adjacency_list(input_points,
                            input_network,
@@ -73,6 +73,7 @@ def compute_adjacency_list(input_points,
   # Calculate barrier cost per input point if not already calculated
   barrier_costs_calculated = row_has_field(test_input_point, BARRIER_COST_FIELD)
   if not barrier_costs_calculated:
+    arcpy.AddMessage(BARRIER_COST_COMPUTATION_STARTED)
     # Add |BARRIER_COST_FIELD| column in |input_points|
     arcpy.AddField_management(in_table=input_points,
                               field_name=BARRIER_COST_FIELD,
@@ -101,7 +102,8 @@ def compute_adjacency_list(input_points,
       barrier_cost = BARRIER_COST / xy_count[get_xy(row)]
       row.setValue(BARRIER_COST_FIELD, barrier_cost)
       rows.updateRow(row)
-    barrier_progress.step()
+      barrier_progress.step()
+    arcpy.AddMessage(BARRIER_COST_COMPUTATION_STARTED)
 
   # Necessary files
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
@@ -217,6 +219,7 @@ def compute_adjacency_list(input_points,
     arcpy.Solve_na(in_network_analysis_layer=od_cost_matrix_layer,
                    ignore_invalids="SKIP")
 
+    # Add origin and destination fields to the adjacency list dbf
     for (index, field) in [(0, ORIGIN_ID_FIELD_NAME),
                            (1, DESTINATION_ID_FIELD_NAME)]:
       arcpy.CalculateField_management(in_table=od_cost_matrix_lines,

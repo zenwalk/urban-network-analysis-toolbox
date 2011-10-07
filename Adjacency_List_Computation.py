@@ -62,13 +62,13 @@ def compute_adjacency_list(input_points,
   test_input_point = arcpy.UpdateCursor(input_points).next()
   locations_calculated = all(row_has_field(test_input_point, field) for field in NETWORK_LOCATION_FIELDS)
   if not locations_calculated:
-    arcpy.AddMessage(START_CALCULATE_LOCATIONS)
+    arcpy.AddMessage(CALCULATE_LOCATIONS_STARTED)
     arcpy.CalculateLocations_na(in_point_features=input_points,
                                 in_network_dataset=input_network,
                                 search_tolerance=SEARCH_TOLERANCE,
                                 search_criteria=junction_feature + " SHAPE;" + edge_feature + " SHAPE",
                                 exclude_restricted_elements="INCLUDE")
-    arcpy.AddMessage(FINISH_CALCULATE_LOCATIONS)
+    arcpy.AddMessage(CALCULATE_LOCATIONS_FINISHED)
 
   # Calculate barrier cost per input point if not already calculated
   barrier_costs_calculated = row_has_field(test_input_point, BARRIER_COST_FIELD)
@@ -82,7 +82,7 @@ def compute_adjacency_list(input_points,
     # Initialize a dictionary to store the frequencies of (SnapX, SnapY) values
     xy_count = {}
     # A method to retrieve a (SnapX, SnapY) pair for a row in |input_points|
-    get_xy = lambda row: (row.getValue("SnapX"), row.getValue("SnapY"))
+    get_xy = lambda row: (row.getValue(trim("SnapX")), row.getValue(trim("SnapY")))
 
     barrier_pre_progress = Progress_Bar(input_point_count, 1, BARRIER_COST_PRE_COMPUTATION)
     rows = arcpy.UpdateCursor(input_points)
@@ -105,6 +105,7 @@ def compute_adjacency_list(input_points,
 
   # Necessary files
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
+  od_cost_matrix_lines = join(od_cost_matrix_layer, OD_COST_MATRIX_LINES)
   temp_adj_dbf_name = adj_dbf_name[-4] + "%.dbf"
   temp_adj_dbf = join(output_location, temp_adj_dbf_name)
   adj_dbf = join(output_location, adj_dbf_name)
@@ -113,7 +114,6 @@ def compute_adjacency_list(input_points,
   raster = join(auxiliary_dir, RASTER_NAME)
   polygons_layer = join(auxiliary_dir, POLYGONS_LAYER_NAME)
   input_points_layer = join(auxiliary_dir, INPUT_POINTS_LAYER_NAME)
-  od_cost_matrix_lines = join(od_cost_matrix_layer, OD_COST_MATRIX_LINES)
 
   # Make sure none of these files already exists
   for file in [od_cost_matrix_layer,
@@ -217,8 +217,8 @@ def compute_adjacency_list(input_points,
     arcpy.Solve_na(in_network_analysis_layer=od_cost_matrix_layer,
                    ignore_invalids="SKIP")
 
-    for (index, field) in [(0, "OriginID"),
-                           (1, "DestinationID")]:
+    for (index, field) in [(0, ORIGIN_ID_FIELD_NAME),
+                           (1, DESTINATION_ID_FIELD_NAME)]:
       arcpy.CalculateField_management(in_table=od_cost_matrix_lines,
                                       field=field,
                                       expression="!Name!.split(' - ')[" + index + "]",

@@ -7,6 +7,7 @@
 # -------------------------------------------------------------------------------------
 
 from sys import maxint
+from Utils import trim
 
 """
 The six steps of the tool
@@ -45,10 +46,38 @@ Console messages
 PROGRESS_NORMALIZATION = "Normalizing Results"
 WARNING_NO_EDGE_FEATURE = lambda input_network: input_network + " does not have edge feature"
 WARNING_NO_JUNCTION_FEATURE = lambda input_network: input_network + " does not have junction feature"
-START_CALCULATE_LOCATIONS = "... [started] Calculating locations on the network"
-FINISH_CALCULATE_LOCATIONS = "... [finished]"
+WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: not_in_graph + " out of " + \
+                              str(in_graph + not_in_graph) + " input points not recorded in graph"
+WARNING_NO_NODES = "No nodes in graph"
+WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 BARRIER_COST_PRE_PROCESSING = "Barrier cost computation pre-processing"
 BARRIER_COST_COMPUTATION = "Barrier cost computation"
+ADJACENCY_LIST_COMPUTED = ""
+CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
+CALCULATE_LOCATIONS_FINISHED = "... [finished]"
+STEP_1_STARTED = ""
+STEP_1_FAILED = ""
+STEP_1_FINISHED = ""
+STEP_2_STARTED = ""
+STEP_2_FAILED = ""
+STEP_2_FINISHED = ""
+STEP_3_STARTED = ""
+STEP_3_FAILED = ""
+STEP_3_FINISHED = ""
+STEP_4_STARTED = ""
+STEP_4_FAILED = ""
+STEP_4_FINISHED = ""
+STEP_5_STARTED = ""
+STEP_5_FAILED = ""
+STEP_5_FINISHED = ""
+STEP_6_STARTED = ""
+STEP_6_FAILED = ""
+STEP_6_FINISHED = ""
+CLEANUP_STARTED = ""
+CLEANUP_FAILED = ""
+CLEANUP_FINISHED = ""
+SUCCESS = "Successful!"
+FAILURE = "Not successful"
 
 """
 Node attribute names
@@ -84,15 +113,19 @@ SEARCH_TOLERANCE = "5000 Meters"
 # Distance offset when buildings are snapped to the network
 SNAP_OFFSET = "5 Meters"
 # File names
+layer_name = lambda base: base + "_Layer"
+ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
-OD_COST_MATRIX_LAYER_NAME = "OD_Cost_Matrix_Layer"
+OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")
 POLYGONS_SHAPEFILE = "Polygons.shp"
 PARTIAL_ADJACENCY_LIST_NAME = "Partial_Adjacency_List"
-PARTIAL_ADJACENCY_LIST_NAME = "Partial_Adjacency_List"
-POLYGONS_LAYER_NAME = "Polygons_Layer"
+POLYGONS_LAYER_NAME = layer_name("Polygons")
 RASTER_NAME = "Raster"
-INPUT_POINTS_LAYER_NAME = "Input_Points_Layer"
+INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
 OD_COST_MATRIX_LINES = "Lines"
+# Origin and Destination ID names
+ORIGIN_ID_FIELD_NAME = trim("OriginID")
+DESTINATION_ID_FIELD_NAME = trim("DestinationID")
 
 """
 Representation for an infinite radius (or infinite extent on the network)

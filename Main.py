@@ -210,7 +210,7 @@ if any(inputs[COMPUTE_REACH],
 
       test_node = nodes.values()[0]
       measures = set([measure for measure in dir(test_node) \
-                      if not measure.startswith("__") and not measure.endswith("__")])
+                      if not (measure.startswith("__") and measure.endswith("__"))])
       for measure in measures:
         arcpy.AddField_management(in_table=output_dbf,
                                   field_name=trim(measure),

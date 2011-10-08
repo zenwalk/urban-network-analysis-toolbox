@@ -99,7 +99,6 @@ def compute_centrality(nodes,
       for w, d_vw, accumulations_vw in nodes[v].neighbors:
         # s ~ ... ~ v ~ w
         d_sw = d_sv + d_vw
-
         if compute_b: b_refresh = False
 
         if not w in d: # Found a path from |s| to |w| for the first time
@@ -139,9 +138,9 @@ def compute_centrality(nodes,
         for v in P[w]:
           delta[v] += sigma[v] / sigma[w] * (1 + delta_w)
         if w != s:
-          between_w = getattr(w, BETWEENNESS)
+          between_w = getattr(nodes[w], BETWEENNESS)
           setattr(nodes[w], BETWEENNESS, between_w + delta_w * weight_s)
-    if compute_c: setattr(nodes[s], CLOSENESS, 1 / d_sum_s if d_sum_s > 0 else 0.0)
+    if compute_c: setattr(nodes[s], CLOSENESS, 1.0 / d_sum_s if d_sum_s > 0 else 0.0)
     if compute_s: setattr(nodes[s], STRAIGHTNESS, straightness_s)
 
     nodes[s].reach = reach_s
@@ -161,12 +160,12 @@ def compute_centrality(nodes,
     norm_progress = Progress_Bar(N, 1, PROGRESS_NORMALIZATION)
     for s in nodes:
       reach_s = nodes[s].reach
-      weighted_reach_s = nodes[s].weighted_reach)
+      weighted_reach_s = nodes[s].weighted_reach
 
       # Normalize reach
       if compute_r and REACH in measures_to_normalize:
         weight_s = getattr(nodes[s], WEIGHT)
-        try: setattr(nodes[s], NORM_REACH, (reach_s + weight_s) / sum_weights
+        try: setattr(nodes[s], NORM_REACH, (reach_s + weight_s) / sum_weights)
         except: setattr(nodes[s], NORM_REACH, 0.0)
 
       # Normalize gravity

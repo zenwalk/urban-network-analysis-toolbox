@@ -7,7 +7,6 @@
 # -------------------------------------------------------------------------------------
 
 from sys import maxint
-from Utils import trim
 
 """
 The six steps of the tool
@@ -22,6 +21,7 @@ STEP_6 = "Displaying results"
 """
 Inputs to the tool
 """
+INPUT_COUNT = 17
 INPUT_POINTS = "Input Points"
 INPUT_NETWORK = "Input Network"
 COMPUTE_REACH = "Compute Reach"
@@ -43,7 +43,7 @@ ACCUMULATOR_ATTRIBUTES = "Accumulator Attributes"
 """
 Console messages
 """
-PROGRESS_NORMALIZATION = "Normalizing Results"
+PROGRESS_NORMALIZATION = "Normalizing results"
 
 WARNING_NO_EDGE_FEATURE = lambda input_network: input_network + " does not have edge feature"
 WARNING_NO_JUNCTION_FEATURE = lambda input_network: input_network + " does not have junction feature"
@@ -61,7 +61,7 @@ CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the networ
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
 BARRIER_COST_COMPUTATION_STARTED = "... [started] Computing barrier costs"
 BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
-SSTEP_1_STARTED = "[1 started] " + STEP_1
+STEP_1_STARTED = "[1 started] " + STEP_1
 STEP_1_FAILED = "[1 failed] "
 STEP_1_FINISHED = "[1 finished]"
 STEP_2_STARTED = "[2 started] " + STEP_2
@@ -88,18 +88,23 @@ FAILURE = "Not successful"
 """
 Node attribute names
 """
-LOCATION = "location"
-WEIGHT = "weight"
-REACH = "reach"
-NORM_REACH = "norm_reach"
-GRAVITY = "gravity_type_index"
-NORM_GRAVITY = "norm_gravity_type_index"
-BETWEENNESS = "betweenness"
-NORM_BETWEENNESS = "norm_betweenness"
-CLOSENESS = "closeness"
-NORM_CLOSENESS = "norm_closeness"
-STRAIGHTNESS = "straightness"
-NORM_STRAIGHTNESS = "norm_straightness"
+LOCATION = "Location"
+WEIGHT = "Weight"
+REACH = "Reach"
+NORM_REACH = "Norm_Reach"
+GRAVITY = "Gravity_Type_Index"
+NORM_GRAVITY = "Norm_Gravity_Type_Index"
+BETWEENNESS = "Betweenness"
+NORM_BETWEENNESS = "Norm_Betweenness"
+CLOSENESS = "Closeness"
+NORM_CLOSENESS = "Norm_Closeness"
+STRAIGHTNESS = "Straightness"
+NORM_STRAIGHTNESS = "Norm_Straightness"
+FINAL_ATTRIBUTES = set([REACH, NORM_REACH,
+                        GRAVITY, NORM_GRAVITY,
+                        BETWEENNESS, NORM_BETWEENNESS,
+                        CLOSENESS, NORM_CLOSENESS,
+                        STRAIGHTNESS, NORM_STRAIGHTNESS])
 
 """
 Constants for adjacency list computation
@@ -113,7 +118,7 @@ NETWORK_LOCATION_FIELDS = ("SourceID", "SourceOID", "PosAlong", "SideOfEdge", "S
 POINTS_PER_RASTER_CELL = 500
 # High cost assigned to buildings to stop neighbor search when a building is encountered
 BARRIER_COST_FIELD = "Barrier_Cost"
-BARRIER_COST = maxint * float(2) / 5
+BARRIER_COST = (maxint / 5) * 2
 # Maximum extent of search on the network
 SEARCH_TOLERANCE = "5000 Meters"
 # Distance offset when buildings are snapped to the network
@@ -123,15 +128,15 @@ layer_name = lambda base: base + "_Layer"
 ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
 OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")
-POLYGONS_SHAPEFILE = "Polygons.shp"
-PARTIAL_ADJACENCY_LIST_NAME = "Partial_Adjacency_List"
+POLYGONS_SHAPEFILE_NAME = "Polygons.shp"
+PARTIAL_ADJACENCY_LIST_NAME = "Partial_Adjacency_List.dbf"
 POLYGONS_LAYER_NAME = layer_name("Polygons")
 RASTER_NAME = "Raster"
 INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
 OD_COST_MATRIX_LINES = "Lines"
 # Origin and Destination ID names
-ORIGIN_ID_FIELD_NAME = trim("OriginID")
-DESTINATION_ID_FIELD_NAME = trim("DestinationID")
+ORIGIN_ID_FIELD_NAME = "OriginID"
+DESTINATION_ID_FIELD_NAME = "DestinationID"
 
 """
 Representation for an infinite radius (or infinite extent on the network)

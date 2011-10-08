@@ -23,7 +23,7 @@ arcpy.CheckOutExtension("Network")
 success = True
 
 # Inputs
-if len(argv) != 17:
+if len(argv) != INPUT_COUNT + 1:
   raise Exception("Invalid number of inputs")
 inputs = {}
 inputs[INPUT_POINTS] = argv[1]
@@ -46,227 +46,222 @@ inputs[OUTPUT_LOCATION] = argv[15]
 inputs[OUTPUT_FILE_NAME] = argv[16]
 inputs[ACCUMULATOR_ATTRIBUTES] = argv[17]
 
-if any(inputs[COMPUTE_REACH],
-       inputs[COMPUTE_GRAVITY],
-       inputs[COMPUTE_BETWEENNESS],
-       inputs[COMPUTE_CLOSENESS],
-       inputs[COMPUTE_STRAIGHTNESS]): # Computing any measure?
+# Step 1
+if success:
+  arcpy.AddMessage(STEP_1_STARTED)
+  adj_dbf_name = ADJACENCY_LIST_NAME + "_" + \
+                 arcpy.Describe(inputs[INPUT_POINTS]).baseName + "_" + \
+                 arcpy.Describe(inputs[INPUT_NETWORK]).baseName + "_" + \
+                 inputs[ID_ATTRIBUTE] + "_" + \
+                 inputs[IMPEDANCE_ATTRIBUTE] + "_" + \
+                 inputs[ACCUMULATOR_ATTRIBUTES] + "_" + \
+                 inputs[MAX_NEIGHBOR_SEPARATION] + \
+                 ".dbf"
+  adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
-  # Step 1
-  if success:
-    arcpy.AddMessage(STEP_1_STARTED)
-    adj_file_name = ADJACENCY_LIST_NAME + "_" + \
-                    arcpy.Describe(inputs[INPUT_POINTS]).baseName + "_" + \
-                    arcpy.Describe(inputs[INPUT_NETWORK]).baseName + "_" + \
-                    inputs[ID_ATTRIBUTE] + "_" + \
-                    inputs[IMPEDANCE_ATTRIBUTE] + "_" + \
-                    inputs[ACCUMULATOR_ATTRIBUTES] + "_" + \
-                    inputs[MAX_NEIGHBOR_SEPARATION] + \
-                    ".dbf"
-    adj_file = join(output_location, adj_file_name)
-
-    if arcpy.Exists(adj_file):
-      arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
+  if arcpy.Exists(adj_dbf):
+    arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
+    arcpy.AddMessage(STEP_1_FINISHED)
+  else:
+    try:
+      compute_adjacency_list(inputs[INPUT_POINTS],
+                             inputs[INPUT_NETWORK],
+                             inputs[ID_ATTRIBUTE],
+                             inputs[IMPEDANCE_ATTRIBUTE],
+                             inputs[ACCUMULATOR_ATTRIBUTES],
+                             inputs[SEARCH_RADIUS],
+                             inputs[MAX_NEIGHBOR_SEPARATION],
+                             inputs[OUTPUT_LOCATION],
+                             adj_dbf_name)
       arcpy.AddMessage(STEP_1_FINISHED)
-    else:
-      try:
-        compute_adjacency_list(inputs[INPUT_POINTS],
-                               inputs[INPUT_NETWORK],
-                               inputs[ID_ATTRIBUTE],
-                               inputs[IMPEDANCE_ATTRIBUTE],
-                               inputs[ACCUMULATOR_ATTRIBUTES],
-                               inputs[SEARCH_RADIUS],
-                               inputs[MAX_NEIGHBOR_SEPARATION],
-                               inputs[OUTPUT_LOCATION],
-                               adj_file_name)
-        arcpy.AddMessage(STEP_1_FINISHED)
-      except:
-        arcpy.AddWarning(arcpy.GetMessages(2))
-        arcpy.AddMessage(STEP_1_FAILED)
-        success = False
-
-  # Step 2
-  if success:
-    arcpy.AddMessage(STEP_2_STARTED)
-    try:
-      distance_field = trim("Total_" + inputs[IMPEDANCE_ATTRIBUTE])
-      accumulator_fields = set([trim("Total_" + accumulator_attribute) \
-                                for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES] \
-                                if accumulator_attribute != "#"])
-      
-      # Create graph representation: a dictionary mapping node id's to Node objects
-      nodes = {}
-
-      directed_edge_count = arcpy.GetCount_management(adj_file) # The number of rows in |adj_file|
-      graph_progress = Progress_Bar(directed_edge_count, 1, STEP_2)
-      rows = arcpy.UpdateCursor(adj_file)
-      for row in rows:
-        # Get neighboring nodes, and the distance between them
-        origin_id = row.getValue(ORIGIN_ID_FIELD_NAME)
-        destination_id = row.getValue(DESTINATION_ID_FIELD_NAME)
-        distance = float(row.getValue(distance_field)) - 2 * BARRIER_COST
-
-        # Make sure the nodes are recorded in the graph
-        for id in [origin_id, destination_id]:
-          if not id in nodes:
-            nodes[id] = Node()
-
-        # Make sure that the nodes are neighbors in the graph
-        if origin_id != destination_id and distance >= 0:
-          accumulations = {}
-          for accumulation_attribute in inputs[ACCUMULATOR_ATTRIBUTES]:
-            accumulations[accumulation_attribute] = float(row.getValue(trim(accumulation_attribute)))
-          nodes[origin_id].add_neighbor(destination, distance, accumulations)
-          nodes[destination_id].add_neighbor(origin, distance, accumulations)
-
-        graph_progress.step()
-
-      N = len(nodes) # The number of nodes in the graph
-      if N === 0:
-        arcpy.AddWarning(WARNING_NO_NODES)
-        success = False
-      arcpy.AddMessage(STEP_2_FINISHED)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_2_FAILED)
+      arcpy.AddMessage(STEP_1_FAILED)
       success = False
 
-  # Step 3
-  if success:
-    arcpy.AddMessage(STEP_3_STARTED)
-    try:
-      get_weights = inputs[NODE_WEIGHT_ATTRIBUTE] != "#"
-      get_locations = inputs[COMPUTE_STRAIGHTNESS]
+# Step 2
+if success:
+  arcpy.AddMessage(STEP_2_STARTED)
+  try:
+    distance_field = trim("Total_" + inputs[IMPEDANCE_ATTRIBUTE])
+    accumulator_fields = set([trim("Total_" + accumulator_attribute) \
+                              for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES].split(";") \
+                              if accumulator_attribute != "#"])
 
-      # Keep track of number nodes in |input_points| not present in the graph
-      point_not_in_graph_count = 0
+    # Create graph representation: a dictionary mapping node id's to Node objects
+    nodes = {}
 
-      input_point_count = arcpy.GetCount_management(inputs[INPUT_POINTS])
-      node_attribute_progress = Progress_Bar(input_point_count, 1, STEP_3)
-      rows = arcpy.UpdateCursor(inputs[INPUT_POINTS])
-      for row in rows:
-        id = row.getValue(inputs[ID_ATTRIBUTE])
+    directed_edge_count = int(arcpy.GetCount_management(adj_dbf).getOutput(0)) # The number of rows in |adj_dbf|
+    graph_progress = Progress_Bar(directed_edge_count, 1, STEP_2)
+    rows = arcpy.UpdateCursor(adj_dbf)
+    for row in rows:
+      # Get neighboring nodes, and the distance between them
+      origin_id = row.getValue(trim(ORIGIN_ID_FIELD_NAME))
+      destination_id = row.getValue(trim(DESTINATION_ID_FIELD_NAME))
+      distance = float(row.getValue(distance_field)) - 2 * BARRIER_COST
 
+      # Make sure the nodes are recorded in the graph
+      for id in [origin_id, destination_id]:
         if not id in nodes:
-          point_not_in_graph_count += 1
-          continue
+          nodes[id] = Node()
 
-        if get_weights:
-          setattr(nodes[id], WEIGHT, row.getValue(trim(inputs[NODE_WEIGHT_ATTRIBUTE])))
+      # Make sure that the nodes are neighbors in the graph
+      if origin_id != destination_id and distance >= 0:
+        accumulations = {}
+        for field in accumulator_fields:
+          accumulations[field] = float(row.getValue(field))
+        nodes[origin_id].add_neighbor(destination_id, distance, accumulations)
+        nodes[destination_id].add_neighbor(origin_id, distance, accumulations)
 
-        if get_locations:
-          snap_x = row.getValue(trim("SnapX"))
-          snap_y = row.getValue(trim("SnapY"))
-          setattr(nodes[id], LOCATION, (snap_x, snap_y))
+      graph_progress.step()
 
-        node_attribute_progress.step()
-
-      if point_not_in_graph_count:
-        arcpy.AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N, point_not_in_graph_count))
-
-      arcpy.AddMessage(STEP_3_FINISHED)
-    except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_3_FAILED)
+    N = len(nodes) # The number of nodes in the graph
+    if N == 0:
+      arcpy.AddWarning(WARNING_NO_NODES)
       success = False
+    arcpy.AddMessage(STEP_2_FINISHED)
+  except:
+    arcpy.AddWarning(arcpy.GetMessages(2))
+    arcpy.AddMessage(STEP_2_FAILED)
+    success = False
 
-  # Step 4
-  if success:
-    arcpy.AddMessage(STEP_4_STARTED)
-    try:
-      # Compute measures
-      compute_centrality(nodes,
-                         inputs[COMPUTE_REACH],
-                         inputs[COMPUTE_GRAVITY],
-                         inputs[COMPUTE_BETWEENNESS],
-                         inputs[COMPUTE_CLOSENESS],
-                         inputs[COMPUTE_STRAIGHTNESS],
-                         inputs[SEARCH_RADIUS],
-                         inputs[BETA],
-                         inputs[NORMALIZE_RESULTS],
-                         inputs[ACCUMULATOR_ATTRIBUTES])
-      arcpy.AddMessage(STEP_4_FINISHED)
-    except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_4_FAILED)
-      success = False
+# Step 3
+if success:
+  arcpy.AddMessage(STEP_3_STARTED)
+  try:
+    get_weights = inputs[NODE_WEIGHT_ATTRIBUTE] != "#"
+    get_locations = inputs[COMPUTE_STRAIGHTNESS]
 
-  # Step 5
-  if success:
-    arcpy.AddMessage(STEP_5_STARTED)
-    try:
-      output_dbf_name = inputs[OUTPUT_FILE_NAME] + ".dbf"
-      output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
-      if arcpy.Exists(output_dbf):
-        arcpy.Delete_management(output_dbf)
-      arcpy.CreateTabele_management(out_path=inputs[OUTPUT_LOCATION],
-                                    out_name=output_dbf_name)
+    # Keep track of number nodes in |input_points| not present in the graph
+    point_not_in_graph_count = 0
 
+    input_point_count = int(arcpy.GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
+    node_attribute_progress = Progress_Bar(input_point_count, 1, STEP_3)
+    rows = arcpy.UpdateCursor(inputs[INPUT_POINTS])
+    for row in rows:
+      id = row.getValue(inputs[ID_ATTRIBUTE])
+
+      if not id in nodes:
+        point_not_in_graph_count += 1
+        continue
+
+      if get_weights:
+        setattr(nodes[id], WEIGHT, row.getValue(trim(inputs[NODE_WEIGHT_ATTRIBUTE])))
+
+      if get_locations:
+        snap_x = row.getValue(trim("SnapX"))
+        snap_y = row.getValue(trim("SnapY"))
+        setattr(nodes[id], LOCATION, (snap_x, snap_y))
+
+      node_attribute_progress.step()
+
+    if point_not_in_graph_count:
+      arcpy.AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N, point_not_in_graph_count))
+
+    arcpy.AddMessage(STEP_3_FINISHED)
+  except:
+    arcpy.AddWarning(arcpy.GetMessages(2))
+    arcpy.AddMessage(STEP_3_FAILED)
+    success = False
+
+# Step 4
+if success:
+  arcpy.AddMessage(STEP_4_STARTED)
+  try:
+    # Compute measures
+    compute_centrality(nodes,
+                       inputs[COMPUTE_REACH],
+                       inputs[COMPUTE_GRAVITY],
+                       inputs[COMPUTE_BETWEENNESS],
+                       inputs[COMPUTE_CLOSENESS],
+                       inputs[COMPUTE_STRAIGHTNESS],
+                       inputs[SEARCH_RADIUS],
+                       inputs[BETA],
+                       inputs[NORMALIZE_RESULTS],
+                       accumulator_fields)
+    arcpy.AddMessage(STEP_4_FINISHED)
+  except:
+    arcpy.AddWarning(arcpy.GetMessages(2))
+    arcpy.AddMessage(STEP_4_FAILED)
+    success = False
+
+# Step 5
+if success:
+  arcpy.AddMessage(STEP_5_STARTED)
+  try:
+    output_dbf_name = inputs[OUTPUT_FILE_NAME] + ".dbf"
+    output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
+    if arcpy.Exists(output_dbf):
+      arcpy.Delete_management(output_dbf)
+    arcpy.CreateTable_management(out_path=inputs[OUTPUT_LOCATION],
+                                  out_name=output_dbf_name)
+
+    if inputs[ID_ATTRIBUTE] != "FID":
+      arcpy.AddField_management(in_table=output_dbf,
+                                field_name=trim(inputs[ID_ATTRIBUTE]),
+                                field_type="TEXT",
+                                field_is_nullable="NON_NULLABLE")
+
+    test_node = nodes.values()[0]
+    measures = set([measure for measure in dir(test_node) \
+                    if measure in FINAL_ATTRIBUTES or is_accumulator_field(measure)])
+
+    for measure in measures:
+      arcpy.AddField_management(in_table=output_dbf,
+                                field_name=trim(measure),
+                                field_type="DOUBLE",
+                                field_is_nullable="NON_NULLABLE")
+
+    write_progress = Progress_Bar(N, 1, STEP_5)
+    rows = arcpy.InsertCursor(output_dbf)
+    for id in nodes:
+      row = rows.newRow()
       if inputs[ID_ATTRIBUTE] != "FID":
-        arcpy.AddField_management(in_table=output_dbf,
-                                  field_name=trim(inputs[ID_ATTRIBUTE]),
-                                  field_type="TEXT",
-                                  field_is_nullable="NON_NULLABLE")
-
-      test_node = nodes.values()[0]
-      measures = set([measure for measure in dir(test_node) \
-                      if not (measure.startswith("__") and measure.endswith("__"))])
+        row.setValue(trim(inputs[ID_ATTRIBUTE]), str(id))
       for measure in measures:
-        arcpy.AddField_management(in_table=output_dbf,
-                                  field_name=trim(measure),
-                                  field_type="DOUBLE",
-                                  field_is_nullable="NON_NULLABLE")
+        row.setValue(trim(measure), getattr(nodes[id], measure))
+      rows.insertRow(row)
+      write_progress.step()
 
-      write_progress = Progress_Bar(N, 1, STEP_5)
-      rows = arcpy.InsertCursor(output_dbf)
-      for id in nodes:
-        row = rows.newRow()
-        if inputs[ID_ATTRIBUTE] != "FID":
-          row.setValue(trim(inputs[ID_ATTRIBUTE]), str(id))
-        for measure in measures:
-          row.setValue(measure, getattr(nodes[id], measure))
-        rows.insertRow(row)
-        write_progress.step()
+    arcpy.AddMessage(STEP_5_FINISHED)
+  except:
+    arcpy.AddWarning(arcpy.GetMessages(2))
+    arcpy.AddMessage(STEP_5_FAILED)
+    success = False
 
-      arcpy.AddMessage(STEP_5_FINISHED)
-    except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_5_FAILED)
-      success = False
+# Step 6
+if success:
+  arcpy.AddMessage(STEP_6_STARTED)
+  try:
+    output_layer = layer_name(inputs[OUTPUT_FILE_NAME][:-4])
+    arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_POINTS],
+                                      out_layer=output_layer)
+    # Join |output_dbf| with |output_layer|
+    in_field = inputs[ID_ATTRIBUTE]
+    join_field = "OID" if in_field == "FID" else inputs[ID_ATTRIBUTE]
+    arcpy.AddJoin_management(output_layer, in_field,
+                             output_dbf, join_field)
 
-  # Step 6
+    # Save
+    layer = join(inputs[OUTPUT_LOCATION], output_layer) + ".lyr"
+    arcpy.SaveToLayerFile_management(output_layer, layer, "ABSOLUTE")
+  except:
+    arcpy.AddWarning(arcpy.GetMessages(2))
+    arcpy.AddMessage(STEP_6_FAILED)
+    success = False
+
+  # Display
   if success:
-    arcpy.AddMessage(STEP_6_STARTED)
     try:
-      output_layer = layer_name(output_file_name[-4])
-      arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_POINTS],
-                                        out_layer=output_layer)
-      # Join |output_dbf| with |output_layer|
-      in_field = inputs[ID_ATTRIBUTE]
-      join_field = "OID" if in_field = "FID" else inputs[ID_ATTRIBUTE]
-      arcpy.AddJoin_management(output_layer, in_field,
-                               output_dbf, join_field)
-
-      # Save
-      layer = join(inputs[OUTPUT_LOCATION], output_layer) + ".lyr"
-      arcpy.SaveToLayerFile_management(output_layer, layer, "ABSOLUTE")
+      current_map_document = arcpy.mapping.MapDocument("CURRENT")
+      data_frame = arcpy.mapping.ListDataFrames(current_map_document, "Layers")[0]
+      add_layer = arcpy.mapping.Layer(layer)
+      arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
+      arcpy.AddMessage(STEP_6_FINISHED)
     except:
+      arcpy.AddWarning(WARNING_FAIL_TO_DISPLAY)
       arcpy.AddWarning(arcpy.GetMessages(2))
       arcpy.AddMessage(STEP_6_FAILED)
-      success = False
-
-    # Display
-    if success:
-      try:
-        current_map_document = arcpy.mapping.MapDocument("CURRENT")
-        data_frame = arcpy.mapping.ListDataFrames(current_map_document, "Layers")[0]
-        add_layer = arcpy.mapping.Layer(layer)
-        arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
-        arcpy.AddMessage(STEP_6_FINISHED)
-      except:
-        arcpy.AddWarning(WARNING_FAIL_TO_DISPLAY)
-        arcpy.AddWarning(arcpy.GetMessages(2))
-        arcpy.AddMessage(STEP_6_FAILED)
 
 # Clean up
 arcpy.AddMessage(CLEANUP_STARTED)
@@ -292,11 +287,11 @@ try:
                od_cost_matrix_layer,
                auxiliary_dir]:
     if arcpy.Exists(file):
-      arcpy.Delete_management(file)
-  arcpy.AddMessage(CLEANUP_FINISHED) 
+  arcpy.Delete_management(file)
+  arcpy.AddMessage(CLEANUP_FINISHED)
 except:
   arcpy.AddWarning(arcpy.GetMessages(2))
-  arcpy.AddMessage(CLEAN_UP_FAILED)
+  arcpy.AddMessage(CLEANUP_FAILED)
   success = False
 
 if success: arcpy.AddMessage(SUCCESS)

@@ -32,7 +32,7 @@ class Progress_Bar:
   |p|: display is updated every |p| steps, default is 1
   |caption|: message to display with the progress bar
   """
-  def __init__(slef, n, p=1, caption=""):
+  def __init__(self, n, p=1, caption=""):
     self.n = n
     self.p = p
     self.caption = caption
@@ -72,7 +72,7 @@ class Progress_Bar:
 Returns True if |a| and |b| are within |TOLERANCE|
 """
 def eq_tol(a, b):
-  return abs(a, b) <= TOLERANCE
+  return abs(a - b) <= TOLERANCE
 
 """
 Returns True if |a| is less than |b| by more than |TOLERANCE|
@@ -116,3 +116,9 @@ def row_has_field(row, field):
     return True
   except:
     return False
+
+"""
+Returns True if |field| corresponds to an accumulation.
+"""
+def is_accumulator_field(field):
+  return field.startswith("Total_")

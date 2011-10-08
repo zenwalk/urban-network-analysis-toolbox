@@ -36,7 +36,7 @@ def compute_adjacency_list(input_points,
                            adj_dbf_name):
 
   # Number of points in |input_points|
-  input_point_count = arcpy.GetCount_management(input_points).getOutput(0)
+  input_point_count = int(arcpy.GetCount_management(input_points).getOutput(0))
 
   # Make a directory to store all auxiliary files
   auxiliary_dir = join(output_location, AUXILIARY_DIR_NAME)
@@ -66,17 +66,17 @@ def compute_adjacency_list(input_points,
     arcpy.CalculateLocations_na(in_point_features=input_points,
                                 in_network_dataset=input_network,
                                 search_tolerance=SEARCH_TOLERANCE,
-                                search_criteria=junction_feature + " SHAPE;" + edge_feature + " SHAPE",
+                                search_criteria=junction_feature + " SHAPE;" + edge_feature + " SHAPE;",
                                 exclude_restricted_elements="INCLUDE")
     arcpy.AddMessage(CALCULATE_LOCATIONS_FINISHED)
 
   # Calculate barrier cost per input point if not already calculated
-  barrier_costs_calculated = row_has_field(test_input_point, BARRIER_COST_FIELD)
+  barrier_costs_calculated = row_has_field(test_input_point, trim(BARRIER_COST_FIELD))
   if not barrier_costs_calculated:
     arcpy.AddMessage(BARRIER_COST_COMPUTATION_STARTED)
     # Add |BARRIER_COST_FIELD| column in |input_points|
     arcpy.AddField_management(in_table=input_points,
-                              field_name=BARRIER_COST_FIELD,
+                              field_name=trim(BARRIER_COST_FIELD),
                               field_type="DOUBLE",
                               field_is_nullable="NON_NULLABLE")
 
@@ -85,7 +85,7 @@ def compute_adjacency_list(input_points,
     # A method to retrieve a (SnapX, SnapY) pair for a row in |input_points|
     get_xy = lambda row: (row.getValue(trim("SnapX")), row.getValue(trim("SnapY")))
 
-    barrier_pre_progress = Progress_Bar(input_point_count, 1, BARRIER_COST_PRE_COMPUTATION)
+    barrier_pre_progress = Progress_Bar(input_point_count, 1, BARRIER_COST_PRE_PROCESSING)
     rows = arcpy.UpdateCursor(input_points)
     for row in rows:
       snap_xy = get_xy(row)
@@ -100,15 +100,15 @@ def compute_adjacency_list(input_points,
     rows = arcpy.UpdateCursor(input_points)
     for row in rows:
       barrier_cost = BARRIER_COST / xy_count[get_xy(row)]
-      row.setValue(BARRIER_COST_FIELD, barrier_cost)
+      row.setValue(trim(BARRIER_COST_FIELD), barrier_cost)
       rows.updateRow(row)
       barrier_progress.step()
-    arcpy.AddMessage(BARRIER_COST_COMPUTATION_STARTED)
+    arcpy.AddMessage(BARRIER_COST_COMPUTATION_FINISHED)
 
   # Necessary files
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(od_cost_matrix_layer, OD_COST_MATRIX_LINES)
-  temp_adj_dbf_name = adj_dbf_name[-4] + "%.dbf"
+  temp_adj_dbf_name = adj_dbf_name[:-4] + "%.dbf"
   temp_adj_dbf = join(output_location, temp_adj_dbf_name)
   adj_dbf = join(output_location, adj_dbf_name)
   partial_adj_dbf = join(auxiliary_dir, PARTIAL_ADJACENCY_LIST_NAME)
@@ -152,7 +152,7 @@ def compute_adjacency_list(input_points,
   # Construct |raster| from |input_points|
   arcpy.PointToRaster_conversion(in_features=input_points,
                                  value_field=id_attribute,
-                                 out_rasterdataseLinest=raster,
+                                 out_rasterdataset=raster,
                                  cell_assignment="MOST_FREQUENT",
                                  priority_field="NONE",
                                  cellsize=str(raster_cell_size))
@@ -175,12 +175,13 @@ def compute_adjacency_list(input_points,
                                       out_layer=layer)
 
   # Compute adjacency list, one raster cell at a time
-  progress = Progress_Bar(raster_cell_count, 1, STEP_1):
+  progress = Progress_Bar(raster_cell_count, 1, STEP_1)
   rows = arcpy.UpdateCursor(polygons)
   for row in rows:
     # Select the current polygon
     arcpy.SelectLayerByAttribute_management(in_layer_or_view=polygons_layer,
-                                             where_clause="FID = " + row.FID)
+                                            selection_type="NEW_SELECTION",
+                                            where_clause="FID = " + str(row.FID))
 
     """
     |sub_layer|: one of "Origins", "Destinations", "Barrier Points"
@@ -194,11 +195,10 @@ def compute_adjacency_list(input_points,
                                            "CurbApproach # 0;" + \
                                            field_mappings,
                             search_tolerance=SEARCH_TOLERANCE,
-                            search_criteria=junction_feature + " SHAPE; " + edge_feature + " SHAPE",
+                            search_criteria=junction_feature + " SHAPE; " + edge_feature + " SHAPE;",
                             append="CLEAR",
                             snap_to_position_along_network="SNAP",
-                            snap_offset=SNAP_OFFSET,
-                            exclude_restricted_elements="INCLUDE")
+                            snap_offset=SNAP_OFFSET)
 
     # Origins
     arcpy.SelectLayerByLocation_management(in_layer=input_points_layer,
@@ -212,8 +212,9 @@ def compute_adjacency_list(input_points,
     add_locations("Destinations")
 
     # Point barriers
-    add_locations("Point Barriers", "BarrierType # 2;" + \
-                                    "Attr_" + impedance_attribute + " " + BARRIER_COST_FIELD + " #;")
+    add_locations("Point Barriers", "FullEdge # 0;" + \
+                                    "BarrierType # 2;" + \
+                                    "Attr_" + impedance_attribute + " " + trim(BARRIER_COST_FIELD) + " #;")
 
     # Solve OD Cost matrix
     arcpy.Solve_na(in_network_analysis_layer=od_cost_matrix_layer,
@@ -224,7 +225,7 @@ def compute_adjacency_list(input_points,
                            (1, DESTINATION_ID_FIELD_NAME)]:
       arcpy.CalculateField_management(in_table=od_cost_matrix_lines,
                                       field=field,
-                                      expression="!Name!.split(' - ')[" + index + "]",
+                                      expression="!Name!.split(' - ')[" + str(index) + "]",
                                       expression_type="PYTHON")
 
     # Append result to |temp_adj_dbf|

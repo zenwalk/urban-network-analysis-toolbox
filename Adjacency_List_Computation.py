@@ -8,9 +8,9 @@
 
 import arcpy
 from Constants import *
-from Utils import *
 from os import mkdir
 from os.path import join
+from Utils import *
 
 arcpy.env.overwriteOutput = True # Enable overwriting
 
@@ -66,7 +66,7 @@ def compute_adjacency_list(input_points,
     arcpy.CalculateLocations_na(in_point_features=input_points,
                                 in_network_dataset=input_network,
                                 search_tolerance=SEARCH_TOLERANCE,
-                                search_criteria=junction_feature + " SHAPE;" + edge_feature + " SHAPE;",
+                                search_criteria="%s SHAPE; %s SHAPE;" % (junction_feature, edge_feature),
                                 exclude_restricted_elements="INCLUDE")
     arcpy.AddMessage(CALCULATE_LOCATIONS_FINISHED)
 
@@ -108,7 +108,7 @@ def compute_adjacency_list(input_points,
   # Necessary files
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(od_cost_matrix_layer, OD_COST_MATRIX_LINES)
-  temp_adj_dbf_name = adj_dbf_name[:-4] + "%.dbf"
+  temp_adj_dbf_name = "%s%.dbf" % adj_dbf_name[:-4]
   temp_adj_dbf = join(output_location, temp_adj_dbf_name)
   adj_dbf = join(output_location, adj_dbf_name)
   partial_adj_dbf = join(auxiliary_dir, PARTIAL_ADJACENCY_LIST_NAME)
@@ -181,7 +181,7 @@ def compute_adjacency_list(input_points,
     # Select the current polygon
     arcpy.SelectLayerByAttribute_management(in_layer_or_view=polygons_layer,
                                             selection_type="NEW_SELECTION",
-                                            where_clause="FID = " + str(row.FID))
+                                            where_clause="FID = %s" % str(row.FID))
 
     """
     |sub_layer|: one of "Origins", "Destinations", "Barrier Points"
@@ -191,11 +191,11 @@ def compute_adjacency_list(input_points,
       arcpy.AddLocations_na(in_network_analysis_layer=od_cost_matrix_layer,
                             sub_layer=sub_layer,
                             in_table=input_points_layer,
-                            field_mappings="Name " + id_attribute + " #;" + \
-                                           "CurbApproach # 0;" + \
-                                           field_mappings,
+                            field_mappings=("Name %s #;" % id_attribute
+                                            "CurbApproach # 0;"
+                                            "%s" % field_mappings),
                             search_tolerance=SEARCH_TOLERANCE,
-                            search_criteria=junction_feature + " SHAPE; " + edge_feature + " SHAPE;",
+                            search_criteria="%s SHAPE; %s SHAPE;" % (junction_feature, edge_feature),
                             append="CLEAR",
                             snap_to_position_along_network="SNAP",
                             snap_offset=SNAP_OFFSET)
@@ -212,9 +212,9 @@ def compute_adjacency_list(input_points,
     add_locations("Destinations")
 
     # Point barriers
-    add_locations("Point Barriers", "FullEdge # 0;" + \
-                                    "BarrierType # 2;" + \
-                                    "Attr_" + impedance_attribute + " " + trim(BARRIER_COST_FIELD) + " #;")
+    add_locations("Point Barriers", ("FullEdge # 0;"
+                                     "BarrierType # 2;"
+                                     "Attr_%s %s #;" % (impedance_attribute, trim(BARRIER_COST_FIELD))))
 
     # Solve OD Cost matrix
     arcpy.Solve_na(in_network_analysis_layer=od_cost_matrix_layer,
@@ -225,7 +225,7 @@ def compute_adjacency_list(input_points,
                            (1, DESTINATION_ID_FIELD_NAME)]:
       arcpy.CalculateField_management(in_table=od_cost_matrix_lines,
                                       field=field,
-                                      expression="!Name!.split(' - ')[" + str(index) + "]",
+                                      expression="!Name!.split(' - ')[%d]" % index,
                                       expression_type="PYTHON")
 
     # Append result to |temp_adj_dbf|

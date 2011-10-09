@@ -21,24 +21,34 @@ STEP_6 = "Displaying results"
 """
 Inputs to the tool
 """
-INPUT_COUNT = 17
-INPUT_POINTS = "Input Points"
-INPUT_NETWORK = "Input Network"
-COMPUTE_REACH = "Compute Reach"
-COMPUTE_GRAVITY = "Compute Gravity Type Index"
-COMPUTE_BETWEENNESS = "Compute Betweenness"
-COMPUTE_CLOSENESS = "Compute Closeness"
-COMPUTE_STRAIGHTNESS = "Compute Straightness"
-ID_ATTRIBUTE = "ID Attribute Name"
-NODE_WEIGHT_ATTRIBUTE = "Node Weight Attribute Name"
-IMPEDANCE_ATTRIBUTE = "Impedance Attribute Name"
-SEARCH_RADIUS = "Search Radius"
-MAX_NEIGHBOR_SEPARATION = "Maximum Neighbor Separation"
-BETA = "Beta"
-NORMALIZE_RESULTS = "Normalize Results"
-OUTPUT_LOCATION = "Output Location"
-OUTPUT_FILE_NAME = "Output File Name"
-ACCUMULATOR_ATTRIBUTES = "Accumulator Attributes"
+# Denote each input by its index
+def index():
+  i = 0
+  while True:
+    yield i
+    i += 1
+input_number = index()
+
+INPUT_POINTS = input_number.next()
+INPUT_NETWORK = input_number.next()
+COMPUTE_REACH = input_number.next()
+COMPUTE_GRAVITY = input_number.next()
+COMPUTE_BETWEENNESS = input_number.next()
+COMPUTE_CLOSENESS = input_number.next()
+COMPUTE_STRAIGHTNESS = input_number.next()
+ID_ATTRIBUTE = input_number.next()
+NODE_WEIGHT_ATTRIBUTE = input_number.next()
+IMPEDANCE_ATTRIBUTE = input_number.next()
+SEARCH_RADIUS = input_number.next()
+MAX_NEIGHBOR_SEPARATION = input_number.next()
+BETA = input_number.next()
+NORMALIZE_RESULTS = input_number.next()
+OUTPUT_LOCATION = input_number.next()
+OUTPUT_FILE_NAME = input_number.next()
+ACCUMULATOR_ATTRIBUTES = input_number.next()
+
+# Number of inputs
+INPUT_COUNT = input_number.next()
 
 """
 Console messages
@@ -52,15 +62,16 @@ WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: str(not_in_graph) +
 WARNING_NO_NODES = "No nodes in graph"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 
+ADJACENCY_LIST_COMPUTED = "Adjacency list already computed on previous run"
+
 BARRIER_COST_PRE_PROCESSING = "Barrier cost computation pre-processing"
 BARRIER_COST_COMPUTATION = "Barrier cost computation"
-
-ADJACENCY_LIST_COMPUTED = "Adjacency list already computed on previous run"
+BARRIER_COST_COMPUTATION_STARTED = "... [started] Computing barrier costs"
+BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
 
 CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
-BARRIER_COST_COMPUTATION_STARTED = "... [started] Computing barrier costs"
-BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
+
 STEP_1_STARTED = "[1 started] " + STEP_1
 STEP_1_FAILED = "[1 failed] "
 STEP_1_FINISHED = "[1 finished]"
@@ -79,15 +90,18 @@ STEP_5_FINISHED = "[5 finished]"
 STEP_6_STARTED = "[6 started]" + STEP_6
 STEP_6_FAILED = "[6 failed]"
 STEP_6_FINISHED = "[6 finished]"
+
 CLEANUP_STARTED = "... [started] Clean up"
 CLEANUP_FAILED = "... [failed]"
 CLEANUP_FINISHED = "... [finished]"
+
 SUCCESS = "Successful!"
 FAILURE = "Not successful"
 
 """
 Node attribute names
 """
+NEIGHBORS = "Neighbors"
 LOCATION = "Location"
 WEIGHT = "Weight"
 REACH = "Reach"
@@ -100,6 +114,8 @@ CLOSENESS = "Closeness"
 NORM_CLOSENESS = "Norm_Closeness"
 STRAIGHTNESS = "Straightness"
 NORM_STRAIGHTNESS = "Norm_Straightness"
+
+# Attributes that might be written to file
 FINAL_ATTRIBUTES = set([REACH, NORM_REACH,
                         GRAVITY, NORM_GRAVITY,
                         BETWEENNESS, NORM_BETWEENNESS,
@@ -123,6 +139,10 @@ BARRIER_COST = (maxint / 5) * 2
 SEARCH_TOLERANCE = "5000 Meters"
 # Distance offset when buildings are snapped to the network
 SNAP_OFFSET = "5 Meters"
+# Origin and Destination ID names
+ORIGIN_ID_FIELD_NAME = "OriginID"
+DESTINATION_ID_FIELD_NAME = "DestinationID"
+
 # File names
 layer_name = lambda base: base + "_Layer"
 ADJACENCY_LIST_NAME = "Adjacency_List"
@@ -134,9 +154,6 @@ POLYGONS_LAYER_NAME = layer_name("Polygons")
 RASTER_NAME = "Raster"
 INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
 OD_COST_MATRIX_LINES = "Lines"
-# Origin and Destination ID names
-ORIGIN_ID_FIELD_NAME = "OriginID"
-DESTINATION_ID_FIELD_NAME = "DestinationID"
 
 """
 Representation for an infinite radius (or infinite extent on the network)
@@ -144,6 +161,6 @@ Representation for an infinite radius (or infinite extent on the network)
 INFINITE_RADIUS = maxint
 
 """
-Tolerance on inequality (if ||a - b|| < |TOLERANCE|, we consider a and b equal)
+Tolerance for inequality (if abs(a - b) < |TOLERANCE|, we consider a and b equal)
 """
 TOLERANCE = 0.000001

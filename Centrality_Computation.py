@@ -8,22 +8,22 @@
 
 import arcpy
 from Constants import *
-from Utils import *
-from operator import add
 import heapq
 from math import exp
+from operator import add
+from Utils import *
 
 """
-Computes reach, gravity_type_index, betweenness, closeness, and straightness on a graph.
-|nodes|: representation of graph, a dictionary mapping node id's to Node objects
+Computes reach, gravity type index, betweenness, closeness, and straightness on a graph.
+|nodes|: representation of graph, a dictionary mapping node id's to |Node| objects
 |compute_r|: compute reach?
-|compute_g|: compute gravity_type_index?
+|compute_g|: compute gravity type index?
 |compute_b|: compute betweenness?
 |compute_c|: compute closeness?
 |compute_s|: compute straightness?
-|radius|: buffer radius, only consider nodes that can be reached within this distance
-|beta|: parameter for gravity_type_index
-|measures_to_normalize|: a list of the measures to normalize
+|radius|: for each node, only consider other nodes that can be reached within this distance
+|beta|: parameter for gravity type index
+|measures_to_normalize|: a list of measures to normalize
 |accumulator_fields|: a list of cost attributes to accumulate
 """
 def compute_centrality(nodes,
@@ -48,7 +48,7 @@ def compute_centrality(nodes,
     # Initialize betweenness values
     for id in nodes:
       setattr(nodes[id], BETWEENNESS, 0.0)
-  
+
   # Initialize the sum of all node weights (normalization)
   sum_weights = 0.0
 
@@ -96,7 +96,7 @@ def compute_centrality(nodes,
         if compute_s: straightness_s += weight_v * dist(location_s, location_v) / d_sv
       if compute_b: S.append(v)
 
-      for w, d_vw, accumulations_vw in nodes[v].neighbors:
+      for w, d_vw, accumulations_vw in getattr(nodes[v], NEIGHBORS):
         # s ~ ... ~ v ~ w
         d_sw = d_sv + d_vw
         if compute_b: b_refresh = False
@@ -153,7 +153,7 @@ def compute_centrality(nodes,
       for field in accumulator_fields:
         setattr(nodes[s], field, total_accumulations_s[field])
 
-    progress.step() # |s| is completed, move to next node
+    progress.step()
 
   # Normalization
   if measures_to_normalize:

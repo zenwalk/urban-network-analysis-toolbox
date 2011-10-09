@@ -7,7 +7,7 @@
 # -------------------------------------------------------------------------------------
 
 import arcpy
-from Constants import TOLERANCE
+from Constants import *
 from math import sqrt
 
 """
@@ -29,10 +29,10 @@ Wrapper for the arcpy progress bar
 class Progress_Bar:
   """
   |n|: number of steps to count to
-  |p|: display is updated every |p| steps, default is 1
+  |p|: display is updated every |p| steps
   |caption|: message to display with the progress bar
   """
-  def __init__(self, n, p=1, caption=""):
+  def __init__(self, n, p, caption):
     self.n = n
     self.p = p
     self.caption = caption
@@ -54,7 +54,6 @@ class Progress_Bar:
     # Setup progressor with min, max, interval, and label
     arcpy.SetProgressor("step", "", 0, self.n, self.p)
     arcpy.SetProgressorLabel(self.caption)
-
     # Counter
     count = 0
     while True:
@@ -102,6 +101,8 @@ Returns comb_map, such that comb_map[key] = |f|(|map1|[key], |map2|[key])
 |map1| and |map2| must have the same keys
 """
 def merge_maps(map1, map2, f):
+  if set(map1.keys()) != set(map2.keys()):
+    raise Exception("Invalid input to |merge_maps|")
   comb_map = {}
   for key in map1:
     comb_map[key] = f(map1[key], map2[key])
@@ -118,7 +119,7 @@ def row_has_field(row, field):
     return False
 
 """
-Returns True if |field| corresponds to an accumulation.
+Returns True if |field| is an accumulator field
 """
 def is_accumulator_field(field):
   return field.startswith("Total_")

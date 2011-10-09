@@ -6,15 +6,15 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+from Adjacency_List_Computation import compute_adjacency_list
 import arcpy
 from Centrality_Computation import compute_centrality
-from Adjacency_List_Computation import compute_adjacency_list
 from Constants import *
-from Utils import *
 from math import ceil
 from Node import Node
-from sys import argv
 from os.path import join
+from sys import argv
+from Utils import *
 
 arcpy.env.overwriteOutput = True # Enable overwritting
 arcpy.CheckOutExtension("Network")
@@ -49,14 +49,14 @@ inputs[ACCUMULATOR_ATTRIBUTES] = argv[17]
 # Step 1
 if success:
   arcpy.AddMessage(STEP_1_STARTED)
-  adj_dbf_name = ADJACENCY_LIST_NAME + "_" + \
-                 arcpy.Describe(inputs[INPUT_POINTS]).baseName + "_" + \
-                 arcpy.Describe(inputs[INPUT_NETWORK]).baseName + "_" + \
-                 inputs[ID_ATTRIBUTE] + "_" + \
-                 inputs[IMPEDANCE_ATTRIBUTE] + "_" + \
-                 inputs[ACCUMULATOR_ATTRIBUTES] + "_" + \
-                 inputs[MAX_NEIGHBOR_SEPARATION] + \
-                 ".dbf"
+  adj_dbf_name = "%s_%s_%s_%s_%s_%s_%s.dbf" %
+                 (ADJACENCY_LIST_NAME,
+                  arcpy.Describe(inputs[INPUT_POINTS]).baseName,
+                  arcpy.Describe(inputs[INPUT_NETWORK]).baseName,
+                  inputs[ID_ATTRIBUTE],
+                  inputs[IMPEDANCE_ATTRIBUTE],
+                  inputs[ACCUMULATOR_ATTRIBUTES],
+                  inputs[MAX_NEIGHBOR_SEPARATION])
   adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
   if arcpy.Exists(adj_dbf):
@@ -83,9 +83,9 @@ if success:
 if success:
   arcpy.AddMessage(STEP_2_STARTED)
   try:
-    distance_field = trim("Total_" + inputs[IMPEDANCE_ATTRIBUTE])
-    accumulator_fields = set([trim("Total_" + accumulator_attribute) \
-                              for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES].split(";") \
+    distance_field = trim("Total_%s" % inputs[IMPEDANCE_ATTRIBUTE])
+    accumulator_fields = set([trim("Total_%s" % accumulator_attribute)
+                              for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES].split(";")
                               if accumulator_attribute != "#"])
 
     # Create graph representation: a dictionary mapping node id's to Node objects
@@ -189,7 +189,7 @@ if success:
 if success:
   arcpy.AddMessage(STEP_5_STARTED)
   try:
-    output_dbf_name = inputs[OUTPUT_FILE_NAME] + ".dbf"
+    output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]
     output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
     if arcpy.Exists(output_dbf):
       arcpy.Delete_management(output_dbf)
@@ -243,7 +243,7 @@ if success:
                              output_dbf, join_field)
 
     # Save
-    layer = join(inputs[OUTPUT_LOCATION], output_layer) + ".lyr"
+    layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer)
     arcpy.SaveToLayerFile_management(output_layer, layer, "ABSOLUTE")
   except:
     arcpy.AddWarning(arcpy.GetMessages(2))
@@ -269,7 +269,7 @@ try:
   auxiliary_dir = join(inputs[OUTPUT_LOCATION], AUXILIARY_DIR_NAME)
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(auxiliary_dir, OD_COST_MATRIX_LINES)
-  temp_adj_dbf_name = adj_dbf_name[-4] + "%.dbf"
+  temp_adj_dbf_name = "%s%.dbf" % adj_dbf_name[-4]
   temp_adj_dbf = join(inputs[OUTPUT_LOCATION], temp_adj_dbf_name)
   partial_adj_dbf = join(auxiliary_dir, PARTIAL_ADJACENCY_LIST_NAME)
   polygons = join(auxiliary_dir, POLYGONS_SHAPEFILE_NAME)

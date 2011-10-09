@@ -108,7 +108,7 @@ def compute_adjacency_list(input_points,
   # Necessary files
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(od_cost_matrix_layer, OD_COST_MATRIX_LINES)
-  temp_adj_dbf_name = "%s%.dbf" % adj_dbf_name[:-4]
+  temp_adj_dbf_name = "%s~.dbf" % adj_dbf_name[:-4]
   temp_adj_dbf = join(output_location, temp_adj_dbf_name)
   adj_dbf = join(output_location, adj_dbf_name)
   partial_adj_dbf = join(auxiliary_dir, PARTIAL_ADJACENCY_LIST_NAME)
@@ -191,9 +191,7 @@ def compute_adjacency_list(input_points,
       arcpy.AddLocations_na(in_network_analysis_layer=od_cost_matrix_layer,
                             sub_layer=sub_layer,
                             in_table=input_points_layer,
-                            field_mappings=("Name %s #;" % id_attribute
-                                            "CurbApproach # 0;"
-                                            "%s" % field_mappings),
+                            field_mappings="Name %s #; CurbApproach # 0; %s" % (id_attribute, field_mappings),
                             search_tolerance=SEARCH_TOLERANCE,
                             search_criteria="%s SHAPE; %s SHAPE;" % (junction_feature, edge_feature),
                             append="CLEAR",

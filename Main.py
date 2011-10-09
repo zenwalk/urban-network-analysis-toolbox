@@ -49,22 +49,22 @@ inputs[ACCUMULATOR_ATTRIBUTES] = argv[17]
 # Step 1
 if success:
   arcpy.AddMessage(STEP_1_STARTED)
-  adj_dbf_name = "%s_%s_%s_%s_%s_%s_%s.dbf" %
-                 (ADJACENCY_LIST_NAME,
-                  arcpy.Describe(inputs[INPUT_POINTS]).baseName,
-                  arcpy.Describe(inputs[INPUT_NETWORK]).baseName,
-                  inputs[ID_ATTRIBUTE],
-                  inputs[IMPEDANCE_ATTRIBUTE],
-                  inputs[ACCUMULATOR_ATTRIBUTES],
-                  inputs[MAX_NEIGHBOR_SEPARATION])
+  adj_dbf_name = ("%s_%s_%s_%s_%s_%s_%s.dbf" %
+                  (ADJACENCY_LIST_NAME,
+                   arcpy.Describe(inputs[INPUT_POINTS]).baseName,
+                   arcpy.Describe(inputs[INPUT_NETWORK]).baseName,
+                   inputs[ID_ATTRIBUTE],
+                   inputs[IMPEDANCE_ATTRIBUTE],
+                   inputs[ACCUMULATOR_ATTRIBUTES],
+                   inputs[MAX_NEIGHBOR_SEPARATION]))
   adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
   if arcpy.Exists(adj_dbf):
     arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
     arcpy.AddMessage(STEP_1_FINISHED)
   else:
-    try:
-      compute_adjacency_list(inputs[INPUT_POINTS],
+    #try:
+    compute_adjacency_list(inputs[INPUT_POINTS],
                              inputs[INPUT_NETWORK],
                              inputs[ID_ATTRIBUTE],
                              inputs[IMPEDANCE_ATTRIBUTE],
@@ -73,11 +73,11 @@ if success:
                              inputs[MAX_NEIGHBOR_SEPARATION],
                              inputs[OUTPUT_LOCATION],
                              adj_dbf_name)
-      arcpy.AddMessage(STEP_1_FINISHED)
-    except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_1_FAILED)
-      success = False
+     # arcpy.AddMessage(STEP_1_FINISHED)
+    #except:
+     # arcpy.AddWarning(arcpy.GetMessages(2))
+      #arcpy.AddMessage(STEP_1_FAILED)
+      #success = False
 
 # Step 2
 if success:
@@ -287,8 +287,8 @@ try:
                od_cost_matrix_layer,
                auxiliary_dir]:
     if arcpy.Exists(file):
-  arcpy.Delete_management(file)
-  arcpy.AddMessage(CLEANUP_FINISHED)
+      arcpy.Delete_management(file)
+    arcpy.AddMessage(CLEANUP_FINISHED)
 except:
   arcpy.AddWarning(arcpy.GetMessages(2))
   arcpy.AddMessage(CLEANUP_FAILED)

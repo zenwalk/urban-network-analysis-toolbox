@@ -226,6 +226,13 @@ def compute_adjacency_list(input_points,
                                       expression="!Name!.split(' - ')[%d]" % index,
                                       expression_type="PYTHON")
 
+     # Subtract "2 x Barrier_Cost" from each computed path in order to derive the true path cost
+     dist_field = "Total_" + Impedance_Attribute_Name
+     arcpy.CalculateField_management(in_table=OD_Cost_Matrix_Lines,
+                                        field=dist_field,
+                                        expression='!' + dist_field + '! - (2*' + str(BARRIER_COST) + ')',
+                                        expression_type="PYTHON")
+    
     # Append result to |temp_adj_dbf|
     arcpy.TableToTable_conversion(in_rows=od_cost_matrix_lines,
                                   out_path=auxiliary_dir,

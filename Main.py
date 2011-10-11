@@ -98,7 +98,7 @@ if success:
       # Get neighboring nodes, and the distance between them
       origin_id = row.getValue(trim(ORIGIN_ID_FIELD_NAME))
       destination_id = row.getValue(trim(DESTINATION_ID_FIELD_NAME))
-      distance = float(row.getValue(distance_field)) - 2 * BARRIER_COST
+      distance = float(row.getValue(distance_field))
 
       # Make sure the nodes are recorded in the graph
       for id in [origin_id, destination_id]:

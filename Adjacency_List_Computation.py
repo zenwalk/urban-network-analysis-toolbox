@@ -226,6 +226,13 @@ def compute_adjacency_list(input_points,
                                       expression="!Name!.split(' - ')[%d]" % index,
                                       expression_type="PYTHON")
 
+    # Record actual distance between neighboring nodes
+    distance_field = trim("Total_%s" % impedance_attribute)
+    arcpy.CalculateField_management(in_table=od_cost_matrix_lines,
+                                    field=distance_field,
+                                    expression="!%s! - 2 * %d" % (distance_field, BARRIER_COST),
+                                    expression_type="PYTHON")
+
     # Append result to |temp_adj_dbf|
     arcpy.TableToTable_conversion(in_rows=od_cost_matrix_lines,
                                   out_path=auxiliary_dir,

@@ -55,10 +55,10 @@ Console messages
 """
 PROGRESS_NORMALIZATION = "Normalizing results"
 
-WARNING_NO_EDGE_FEATURE = lambda input_network: input_network + " does not have edge feature"
-WARNING_NO_JUNCTION_FEATURE = lambda input_network: input_network + " does not have junction feature"
-WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: str(not_in_graph) + " out of " + \
-                              str(in_graph + not_in_graph) + " input points not recorded in graph"
+WARNING_NO_EDGE_FEATURE = lambda input_network: "%s does not have edge feature" % input_network
+WARNING_NO_JUNCTION_FEATURE = lambda input_network: "%s does not have junction feature" % input_network
+WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d input points not recorded in graph"
+                                                             % (not_in_graph, in_graph + not_in_graph))
 WARNING_NO_NODES = "No nodes in graph"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 
@@ -72,22 +72,22 @@ BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
 CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
 
-STEP_1_STARTED = "[1 started] " + STEP_1
+STEP_1_STARTED = "[1 started] %s" % STEP_1
 STEP_1_FAILED = "[1 failed] "
 STEP_1_FINISHED = "[1 finished]"
-STEP_2_STARTED = "[2 started] " + STEP_2
+STEP_2_STARTED = "[2 started] %s" % STEP_2
 STEP_2_FAILED = "[2 failed]"
 STEP_2_FINISHED = "[2 finished]"
-STEP_3_STARTED = "[3 started] " + STEP_3
+STEP_3_STARTED = "[3 started] %s" % STEP_3
 STEP_3_FAILED = "[3 failed]"
 STEP_3_FINISHED = "[3 finished]"
-STEP_4_STARTED = "[4 started] " + STEP_4
+STEP_4_STARTED = "[4 started] %s" % STEP_4
 STEP_4_FAILED = "[4 failed]"
 STEP_4_FINISHED = "[4 finished]"
-STEP_5_STARTED = "[5 started] " + STEP_5
+STEP_5_STARTED = "[5 started] %s" % STEP_5
 STEP_5_FAILED = "[5 failed]"
 STEP_5_FINISHED = "[5 finished]"
-STEP_6_STARTED = "[6 started]" + STEP_6
+STEP_6_STARTED = "[6 started] %s" % STEP_6
 STEP_6_FAILED = "[6 failed]"
 STEP_6_FINISHED = "[6 finished]"
 
@@ -144,7 +144,7 @@ ORIGIN_ID_FIELD_NAME = "OriginID"
 DESTINATION_ID_FIELD_NAME = "DestinationID"
 
 # File names
-layer_name = lambda base: base + "_Layer"
+layer_name = lambda base: "%s_Layer" % base
 ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
 OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")

@@ -6,7 +6,6 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
-import arcpy
 from Constants import *
 import heapq
 from math import exp
@@ -165,7 +164,7 @@ def compute_centrality(nodes,
       # Normalize reach
       if compute_r and REACH in measures_to_normalize:
         weight_s = getattr(nodes[s], WEIGHT)
-        try: setattr(nodes[s], NORM_REACH, (reach_s + weight_s) / sum_weights)
+        try: setattr(nodes[s], NORM_REACH, reach_s / (sum_weights - weight_s))
         except: setattr(nodes[s], NORM_REACH, 0.0)
 
       # Normalize gravity

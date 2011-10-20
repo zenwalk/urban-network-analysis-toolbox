@@ -10,7 +10,6 @@ from Adjacency_List_Computation import compute_adjacency_list
 import arcpy
 from Centrality_Computation import compute_centrality
 from Constants import *
-from math import ceil
 from Node import Node
 from os.path import join
 from sys import argv
@@ -63,8 +62,8 @@ if success:
     arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
     arcpy.AddMessage(STEP_1_FINISHED)
   else:
-    #try:
-    compute_adjacency_list(inputs[INPUT_POINTS],
+    try:
+      compute_adjacency_list(inputs[INPUT_POINTS],
                              inputs[INPUT_NETWORK],
                              inputs[ID_ATTRIBUTE],
                              inputs[IMPEDANCE_ATTRIBUTE],
@@ -73,11 +72,11 @@ if success:
                              inputs[MAX_NEIGHBOR_SEPARATION],
                              inputs[OUTPUT_LOCATION],
                              adj_dbf_name)
-     # arcpy.AddMessage(STEP_1_FINISHED)
-    #except:
-     # arcpy.AddWarning(arcpy.GetMessages(2))
-      #arcpy.AddMessage(STEP_1_FAILED)
-      #success = False
+      arcpy.AddMessage(STEP_1_FINISHED)
+    except:
+      arcpy.AddWarning(arcpy.GetMessages(2))
+      arcpy.AddMessage(STEP_1_FAILED)
+      success = False
 
 # Step 2
 if success:
@@ -269,14 +268,13 @@ try:
   auxiliary_dir = join(inputs[OUTPUT_LOCATION], AUXILIARY_DIR_NAME)
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(auxiliary_dir, OD_COST_MATRIX_LINES)
-  temp_adj_dbf_name = "%s%.dbf" % adj_dbf_name[-4]
+  temp_adj_dbf_name = "%s~.dbf" % adj_dbf_name[-4]
   temp_adj_dbf = join(inputs[OUTPUT_LOCATION], temp_adj_dbf_name)
   partial_adj_dbf = join(auxiliary_dir, PARTIAL_ADJACENCY_LIST_NAME)
   polygons = join(auxiliary_dir, POLYGONS_SHAPEFILE_NAME)
   raster = join(auxiliary_dir, RASTER_NAME)
   polygons_layer = join(auxiliary_dir, POLYGONS_LAYER_NAME)
   input_points_layer = join(auxiliary_dir, INPUT_POINTS_LAYER_NAME)
-
   for file in [input_points_layer,
                polygons_layer,
                raster,
@@ -288,7 +286,7 @@ try:
                auxiliary_dir]:
     if arcpy.Exists(file):
       arcpy.Delete_management(file)
-    arcpy.AddMessage(CLEANUP_FINISHED)
+  arcpy.AddMessage(CLEANUP_FINISHED)
 except:
   arcpy.AddWarning(arcpy.GetMessages(2))
   arcpy.AddMessage(CLEANUP_FAILED)

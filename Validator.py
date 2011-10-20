@@ -45,29 +45,30 @@ class ToolValidator:
           self.get_network_properties(network)
         except:
           self.reset_network_properties()
-      else:
-        self.reset_network_properties()
+    else:
+      self.reset_network_properties()
 
     # beta
     self.inputs["beta"].enabled = self.inputs["compute_gravity"].value
 
     # normalize_results
     metrics_to_compute = []
+    norm_results = self.inputs["normalize_results"]
     if self.inputs["compute_reach"].value: metrics_to_compute.append("Reach")
     if self.inputs["compute_gravity"].value: metrics_to_compute.append("Gravity_Type_Index")
     if self.inputs["compute_betweenness"].value: metrics_to_compute.append("Betweenness")
     if self.inputs["compute_closeness"].value: metrics_to_compute.append("Closeness")
     if self.inputs["compute_straightness"].value: metrics_to_compute.append("Straightness")
-    self.inputs["normalize_results"].filter.list = metrics_to_compute
-    self.inputs["normalize_results"].enabled = bool(metrics_to_compute)
+    norm_results.filter.list = metrics_to_compute
+    norm_results.enabled = bool(metrics_to_compute)
 
   """
   Called after internal validation
   """
   def updateMessages(self):
-    network = self.inputs["input_ntwork"]
+    network = self.inputs["input_network"]
     impedance = self.inputs["impedance_attribute"]
-    search_raduis = self.inputs["search_radius"]
+    search_radius = self.inputs["search_radius"]
     if network.altered or impedance.altered:
       try:
         for attribute in arcpy.Describe(network.value).attributes:
@@ -83,7 +84,7 @@ class ToolValidator:
   """
   def get_network_properties(self, network):
     impedance = self.inputs["impedance_attribute"]
-    accumulators = self.inputs["accumulator_attrbutes"]
+    accumulators = self.inputs["accumulator_attributes"]
 
     description = arcpy.Describe(network.value)
     defalut_cost_attribute = ""
@@ -109,4 +110,4 @@ class ToolValidator:
     impedance = self.inputs["impedance_attribute"]
     impedance.filter.list = []
     impedance.value = ""
-    self.inputs["accumulator_attrbutes"].filter.list = []
+    self.inputs["accumulator_attributes"].filter.list = []

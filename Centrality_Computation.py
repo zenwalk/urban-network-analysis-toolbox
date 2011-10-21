@@ -90,7 +90,7 @@ def compute_centrality(nodes,
       weighted_reach_s += weight_v
 
       if d_sv > 0:
-        if compute_g: gravity_s += weight_v / exp(d_sv * beta)
+        if compute_g: gravity_s += weight_v * exp(-d_sv * beta)
         if compute_c: d_sum_s += weight_v * d_sv
         if compute_s: straightness_s += weight_v * dist(location_s, location_v) / d_sv
       if compute_b: S.append(v)

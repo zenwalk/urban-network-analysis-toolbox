@@ -232,7 +232,7 @@ if success:
 if success:
   arcpy.AddMessage(STEP_6_STARTED)
   try:
-    output_layer = layer_name(inputs[OUTPUT_FILE_NAME][:-4])
+    output_layer = layer_name(inputs[OUTPUT_FILE_NAME])
     arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_POINTS],
                                       out_layer=output_layer)
     # Join |output_dbf| with |output_layer|

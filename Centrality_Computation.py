@@ -170,7 +170,7 @@ def compute_centrality(nodes,
       # Normalize gravity
       if compute_g and GRAVITY in measures_to_normalize:
         gravity_s = getattr(nodes[s], GRAVITY)
-        try: setattr(nodes[s], NORM_GRAVITY, gravity_s / weighted_reach_s)
+        try: setattr(nodes[s], NORM_GRAVITY, exp(beta) * gravity_s / weighted_reach_s)
         except: setattr(nodes[s], NORM_GRAVITY, 0.0)
 
       # Normalize betweenness

@@ -12,25 +12,25 @@ from math import exp
 from operator import add
 from Utils import *
 
-"""
-Computes reach, gravity type index, betweenness, closeness, and straightness on a graph.
-|nodes|: representation of graph, a dictionary mapping node id's to |Node| objects
-|compute_r|: compute reach?
-|compute_g|: compute gravity type index?
-|compute_b|: compute betweenness?
-|compute_c|: compute closeness?
-|compute_s|: compute straightness?
-|radius|: for each node, only consider other nodes that can be reached within this distance
-|beta|: parameter for gravity type index
-|measures_to_normalize|: a list of measures to normalize
-|accumulator_fields|: a list of cost attributes to accumulate
-"""
 def compute_centrality(nodes,
                        compute_r, compute_g, compute_b, compute_c, compute_s,
                        radius,
                        beta,
                        measures_to_normalize,
                        accumulator_fields):
+  """
+  Computes reach, gravity type index, betweenness, closeness, and straightness on a graph.
+  |nodes|: representation of graph, a dictionary mapping node id's to |Node| objects
+  |compute_r|: compute reach?
+  |compute_g|: compute gravity type index?
+  |compute_b|: compute betweenness?
+  |compute_c|: compute closeness?
+  |compute_s|: compute straightness?
+  |radius|: for each node, only consider other nodes that can be reached within this distance
+  |beta|: parameter for gravity type index
+  |measures_to_normalize|: a list of measures to normalize
+  |accumulator_fields|: a list of cost attributes to accumulate
+  """
 
   # Number of nodes in the graph
   N = len(nodes)

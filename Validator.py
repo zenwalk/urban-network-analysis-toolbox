@@ -1,9 +1,10 @@
-"""
-Validator for the tool's parameters, controls the behavior of the tool's dialog
-"""
 import arcpy
 
 class ToolValidator:
+  """
+  Validator for the tool's parameters, controls the behavior of the tool's dialog
+  """
+
   def __init__(self):
     params = arcpy.GetParameterInfo()
 
@@ -26,17 +27,17 @@ class ToolValidator:
     self.inputs["output_file_name"] = params[15];
     self.inputs["accumulator_attributes"] = params[16];
 
-  """
-  Called when the tool is opened
-  """
   def initializeParameters(self):
+    """
+    Called when the tool is opened
+    """
     self.inputs["accumulator_attributes"].category = "Accumulators"
     self.inputs["normalize_results"].category = "Normalization"
 
-  """
-  Called whenever a parameter has been changed
-  """
   def updateParameters(self):
+    """
+    Called whenever a parameter has been changed
+    """
     # impedance_attribute
     network = self.inputs["input_network"]
     if network.altered:
@@ -62,10 +63,10 @@ class ToolValidator:
     norm_results.filter.list = metrics_to_compute
     norm_results.enabled = bool(metrics_to_compute)
 
-  """
-  Called after internal validation
-  """
   def updateMessages(self):
+    """
+    Called after internal validation
+    """
     network = self.inputs["input_network"]
     impedance = self.inputs["impedance_attribute"]
     search_radius = self.inputs["search_radius"]
@@ -79,10 +80,10 @@ class ToolValidator:
       except:
         search_radius.setWarningMessage("No units")
 
-  """
-  Updates list of cost attributes based on the input network
-  """
   def get_network_properties(self, network):
+    """
+    Updates list of cost attributes based on the input network
+    """
     impedance = self.inputs["impedance_attribute"]
     accumulators = self.inputs["accumulator_attributes"]
 
@@ -103,10 +104,10 @@ class ToolValidator:
         default_cost_attribute = cost_attributes[0]
       impedance.value = default_cost_attribute
 
-  """
-  Reset the list of cost attributes
-  """
   def reset_network_properties(self):
+    """
+    Reset the list of cost attributes
+    """
     impedance = self.inputs["impedance_attribute"]
     impedance.filter.list = []
     impedance.value = ""

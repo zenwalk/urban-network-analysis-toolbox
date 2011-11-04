@@ -14,17 +14,6 @@ from Utils import *
 
 arcpy.env.overwriteOutput = True # Enable overwriting
 
-"""
-|input_points|: point shape file marking entity (e.g. building) locations
-|input_network|: street network in which |input_points| is located
-|id_attribute|: the name of attribute that distinguishes between input points
-|impedance_attribute|: distance between neighboring nodes will be based on this attribute
-|accumulator_attributes|: distance between neighboring nodes will also be recorded for these attributes
-|search_radius|: the maximum extent for centrality computation
-|max_neighbor_separation|: the maximum extent for neighbor search
-|output_location|: adjacency list dbf will be saved here
-|adj_dbf_name|: the name of the adjacency list dbf
-"""
 def compute_adjacency_list(input_points,
                            input_network,
                            id_attribute,
@@ -34,6 +23,17 @@ def compute_adjacency_list(input_points,
                            max_neighbor_separation,
                            output_location,
                            adj_dbf_name):
+  """
+  |input_points|: point shape file marking entity (e.g. building) locations
+  |input_network|: street network in which |input_points| is located
+  |id_attribute|: the name of attribute that distinguishes between input points
+  |impedance_attribute|: distance between neighboring nodes will be based on this attribute
+  |accumulator_attributes|: distance between neighboring nodes will also be recorded for these attributes
+  |search_radius|: the maximum extent for centrality computation
+  |max_neighbor_separation|: the maximum extent for neighbor search
+  |output_location|: adjacency list dbf will be saved here
+  |adj_dbf_name|: the name of the adjacency list dbf
+  """
 
   # Number of points in |input_points|
   input_point_count = int(arcpy.GetCount_management(input_points).getOutput(0))

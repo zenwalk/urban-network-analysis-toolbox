@@ -10,29 +10,31 @@ import arcpy
 from Constants import *
 from math import sqrt
 
-"""
-Exception thrown when input is invalid
-"""
 class Invalid_Input_Exception(Exception):
   """
-  |input_name|: the name of the invalid input
+  Exception thrown when input is invalid
   """
+
   def __init__(self, input_name):
+    """
+    |input_name|: the name of the invalid input
+    """
     self.input_name = input_name
 
   def __str__(self):
     return "Invalid Input: %s" % self.input_name
 
-"""
-Wrapper for the arcpy progress bar
-"""
 class Progress_Bar:
   """
-  |n|: number of steps to count to
-  |p|: display is updated every |p| steps
-  |caption|: message to display with the progress bar
+  Wrapper for the arcpy progress bar
   """
+
   def __init__(self, n, p, caption):
+    """
+    |n|: number of steps to count to
+    |p|: display is updated every |p| steps
+    |caption|: message to display with the progress bar
+    """
     self.n = n
     self.p = p
     self.caption = caption
@@ -41,16 +43,16 @@ class Progress_Bar:
     # Start progress bar
     self.step()
 
-  """
-  Move the progress bar by 1 step
-  """
   def step(self):
+    """
+    Move the progress bar by 1 step
+    """
     self.bar.next()
 
-  """
-  A generator representation of the arcpy progressor
-  """
   def progress_bar(self):
+    """
+    A generator representation of the arcpy progressor
+    """
     # Setup progressor with min, max, interval, and label
     arcpy.SetProgressor("step", "", 0, self.n, self.p)
     arcpy.SetProgressorLabel(self.caption)
@@ -67,40 +69,40 @@ class Progress_Bar:
       count += 1
       yield
 
-"""
-Returns True if |a| and |b| are within |TOLERANCE|
-"""
 def eq_tol(a, b):
+  """
+  Returns True if |a| and |b| are within |TOLERANCE|, False otherwise
+  """
   return abs(a - b) <= TOLERANCE
 
-"""
-Returns True if |a| is less than |b| by more than |TOLERANCE|
-"""
 def lt_tol(a, b):
+  """
+  Returns True if |a| is less than |b| by more than |TOLERANCE|, False otherwise
+  """
   return b - a > TOLERANCE
 
-"""
-Returns the first 10 characters of |field_name|
-(DBF files truncate field names to 10 characters)
-"""
 def trim(field_name):
+  """
+  Returns the first 10 characters of |field_name|
+  (DBF files truncate field names to 10 characters)
+  """
   return field_name[:10]
 
-"""
-Computes the euclidean distance between |loc1| and |loc2|
-|loc1|: (x1, y1)
-|loc2|: (x2, y2)
-"""
 def dist(loc1, loc2):
+  """
+  Computes the euclidean distance between |loc1| and |loc2|
+  |loc1|: (x1, y1)
+  |loc2|: (x2, y2)
+  """
   x1, y1 = loc1
   x2, y2 = loc2
   return sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-"""
-Returns comb_map, such that comb_map[key] = |f|(|map1|[key], |map2|[key])
-|map1| and |map2| must have the same keys
-"""
 def merge_maps(map1, map2, f):
+  """
+  Returns comb_map, such that comb_map[key] = |f|(|map1|[key], |map2|[key])
+  |map1| and |map2| must have the same keys
+  """
   if set(map1.keys()) != set(map2.keys()):
     raise Exception("Invalid input to |merge_maps|")
   comb_map = {}
@@ -108,18 +110,18 @@ def merge_maps(map1, map2, f):
     comb_map[key] = f(map1[key], map2[key])
   return comb_map
 
-"""
-Returns True if |row| has the field |field|
-"""
 def row_has_field(row, field):
+  """
+  Returns True if |row| has the field |field|, False otherwise
+  """
   try:
     row.getValue(field)
     return True
   except:
     return False
 
-"""
-Returns True if |field| is an accumulator field
-"""
 def is_accumulator_field(field):
+  """
+  Returns True if |field| is an accumulator field, False otherwise
+  """
   return field.startswith("Total_")

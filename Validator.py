@@ -67,6 +67,14 @@ class ToolValidator:
     """
     Called after internal validation
     """
+    # id_attribute
+    id_attribute = self.inputs["id_attribute"]
+    input_points = self.inputs["input_points"]
+    if id_attribute.altered or input_points.altered:
+      if id_attribute.parameterType != "Integer":
+        id_attribute.setWarningMessage("Attribute datatype should be Integer")
+
+    # search_radius
     network = self.inputs["input_network"]
     impedance = self.inputs["impedance_attribute"]
     search_radius = self.inputs["search_radius"]
@@ -86,7 +94,6 @@ class ToolValidator:
     """
     impedance = self.inputs["impedance_attribute"]
     accumulators = self.inputs["accumulator_attributes"]
-
     description = arcpy.Describe(network.value)
     defalut_cost_attribute = ""
     cost_attributes = []
@@ -95,10 +102,8 @@ class ToolValidator:
         if attribute.useByDefault:
           default_cost_attribute = attribute.name
         cost_attributes.append(attribute.name)
-
     impedance.filter.list = cost_attributes
     accumulators.filter.list = cost_attributes
-
     if not impedance.altered:
       if default_cost_attribute == "" and cost_attributes:
         default_cost_attribute = cost_attributes[0]

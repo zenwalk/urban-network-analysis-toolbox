@@ -45,19 +45,28 @@ inputs[OUTPUT_LOCATION] = argv[15]
 inputs[OUTPUT_FILE_NAME] = argv[16]
 inputs[ACCUMULATOR_ATTRIBUTES] = argv[17]
 
+# Output files
+output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]
+output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
+output_layer = layer_name(inputs[OUTPUT_FILE_NAME])
+# If output has already been created, don't carry on
+if arcpy.Exists(output_dbf) or arcpy.Exists(output_layer):
+  arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
+  success = False
+# Adjacency List table
+adj_dbf_name = ("%s_%s_%s_%s_%s_%s_%s.dbf" %
+                (ADJACENCY_LIST_NAME,
+                 arcpy.Describe(inputs[INPUT_POINTS]).baseName,
+                 arcpy.Describe(inputs[INPUT_NETWORK]).baseName,
+                 inputs[ID_ATTRIBUTE],
+                 inputs[IMPEDANCE_ATTRIBUTE],
+                 inputs[ACCUMULATOR_ATTRIBUTES],
+                 inputs[MAX_NEIGHBOR_SEPARATION]))
+adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
+
 # Step 1
 if success:
   arcpy.AddMessage(STEP_1_STARTED)
-  adj_dbf_name = ("%s_%s_%s_%s_%s_%s_%s.dbf" %
-                  (ADJACENCY_LIST_NAME,
-                   arcpy.Describe(inputs[INPUT_POINTS]).baseName,
-                   arcpy.Describe(inputs[INPUT_NETWORK]).baseName,
-                   inputs[ID_ATTRIBUTE],
-                   inputs[IMPEDANCE_ATTRIBUTE],
-                   inputs[ACCUMULATOR_ATTRIBUTES],
-                   inputs[MAX_NEIGHBOR_SEPARATION]))
-  adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
-
   if arcpy.Exists(adj_dbf):
     arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
     arcpy.AddMessage(STEP_1_FINISHED)
@@ -188,10 +197,6 @@ if success:
 if success:
   arcpy.AddMessage(STEP_5_STARTED)
   try:
-    output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]
-    output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
-    if arcpy.Exists(output_dbf):
-      arcpy.Delete_management(output_dbf)
     arcpy.CreateTable_management(out_path=inputs[OUTPUT_LOCATION],
                                   out_name=output_dbf_name)
 
@@ -232,7 +237,6 @@ if success:
 if success:
   arcpy.AddMessage(STEP_6_STARTED)
   try:
-    output_layer = layer_name(inputs[OUTPUT_FILE_NAME])
     arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_POINTS],
                                       out_layer=output_layer)
     # Join |output_dbf| with |output_layer|

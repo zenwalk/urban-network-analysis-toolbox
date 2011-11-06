@@ -55,6 +55,8 @@ Console messages
 """
 PROGRESS_NORMALIZATION = "Normalizing results"
 
+WARNING_OUTPUT_ALREADY_EXISTS = "Output with the same name already exists"
+
 WARNING_NO_EDGE_FEATURE = lambda input_network: "%s does not have edge feature" % input_network
 WARNING_NO_JUNCTION_FEATURE = lambda input_network: "%s does not have junction feature" % input_network
 WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d input points not recorded in graph"

@@ -77,11 +77,8 @@ def to_point_feature_class(feature_class, location):
   Saves the new file at |location|
   """
   feature_class_name = str(arcpy.Describe(feature_class).baseName)
-  arcpy.AddMessage(feature_class_name)
   point_feature_class_name = POINT_FEATURE_CLASS_NAME(feature_class_name)
-  arcpy.AddMessage(point_feature_class_name)
   point_feature_class = "%s.shp" % (join(location, point_feature_class_name))
-  arcpy.AddMessage(point_feature_class)
   arcpy.FeatureToPoint_management(in_features=feature_class,
                                   out_feature_class=point_feature_class,
 				  point_location="CENTROID")

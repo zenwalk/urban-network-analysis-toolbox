@@ -50,6 +50,10 @@ ACCUMULATOR_ATTRIBUTES = input_number.next()
 # Number of inputs
 INPUT_COUNT = input_number.next()
 
+# Name of input points after feature to point conversion
+POINT_FEATURE_CLASS_NAME = lambda feature_class_name: ("%s_FeatureToPoint"
+                           % (feature_class_name))
+
 """
 Console messages
 """

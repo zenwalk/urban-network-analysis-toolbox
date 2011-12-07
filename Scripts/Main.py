@@ -45,6 +45,10 @@ inputs[OUTPUT_LOCATION] = argv[15]
 inputs[OUTPUT_FILE_NAME] = argv[16]
 inputs[ACCUMULATOR_ATTRIBUTES] = argv[17]
 
+# Convert input points to point feature class
+inputs[INPUT_POINTS] = to_point_feature_class(inputs[INPUT_POINTS],
+                                              inputs[OUTPUT_LOCATION])
+
 # Output files
 output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]
 output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)

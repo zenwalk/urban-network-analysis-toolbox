@@ -9,6 +9,7 @@
 import arcpy
 from Constants import *
 from math import sqrt
+from os.path import join
 
 class Invalid_Input_Exception(Exception):
   """
@@ -68,6 +69,23 @@ class Progress_Bar:
         arcpy.ResetProgressor()
       count += 1
       yield
+
+def to_point_feature_class(feature_class, location):
+  """
+  Converts |feature_class| to point feature class
+  Returns the name of the newly created point feature class
+  Saves the new file at |location|
+  """
+  feature_class_name = str(arcpy.Describe(feature_class).baseName)
+  arcpy.AddMessage(feature_class_name)
+  point_feature_class_name = POINT_FEATURE_CLASS_NAME(feature_class_name)
+  arcpy.AddMessage(point_feature_class_name)
+  point_feature_class = "%s.shp" % (join(location, point_feature_class_name))
+  arcpy.AddMessage(point_feature_class)
+  arcpy.FeatureToPoint_management(in_features=feature_class,
+                                  out_feature_class=point_feature_class,
+				  point_location="CENTROID")
+  return point_feature_class
 
 def eq_tol(a, b):
   """

@@ -53,10 +53,10 @@ def compute_adjacency_list(input_points,
       junction_feature = source.name
   if edge_feature == None:
     arcpy.AddWarning(WARNING_NO_EDGE_FEATURE(input_network))
-    raise Invalid_Input_Exception(input_network)
+    raise Invalid_Input_Exception("Input Network")
   if junction_feature == None:
     arcpy.AddWarning(WARNING_NO_JUNCTION_FEATURE(input_network))
-    raise Invalid_Input_Exception(input_network)
+    raise Invalid_Input_Exception("Input Network")
 
   # Calculate network locations if not already calculated
   test_input_point = arcpy.UpdateCursor(input_points).next()

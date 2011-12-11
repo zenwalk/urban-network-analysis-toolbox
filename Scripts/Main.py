@@ -24,29 +24,41 @@ success = True
 # Inputs
 if len(argv) != INPUT_COUNT + 1:
   raise Exception("Invalid number of inputs")
+def index():
+  i = 1
+  while True:
+    yield i
+    i += 1
+input_number = index()
 inputs = {}
-inputs[INPUT_POINTS] = argv[1]
-inputs[INPUT_NETWORK] = argv[2]
-inputs[COMPUTE_REACH] = argv[3] == "true"
-inputs[COMPUTE_GRAVITY] = argv[4] == "true"
-inputs[COMPUTE_BETWEENNESS] = argv[5] == "true"
-inputs[COMPUTE_CLOSENESS] = argv[6] == "true"
-inputs[COMPUTE_STRAIGHTNESS] = argv[7] == "true"
-inputs[ID_ATTRIBUTE] = argv[8]
-inputs[NODE_WEIGHT_ATTRIBUTE] = argv[9]
-inputs[IMPEDANCE_ATTRIBUTE] = argv[10]
-try: inputs[SEARCH_RADIUS] = float(argv[11])
+inputs[INPUT_BUILDINGS] = argv[input_number.next()]
+inputs[INPUT_NETWORK] = argv[input_number.next()]
+inputs[COMPUTE_REACH] = argv[input_number.next()] == "true"
+inputs[COMPUTE_GRAVITY] = argv[input_number.next()] == "true"
+inputs[COMPUTE_BETWEENNESS] = argv[input_number.next()] == "true"
+inputs[COMPUTE_CLOSENESS] = argv[input_number.next()] == "true"
+inputs[COMPUTE_STRAIGHTNESS] = argv[input_number.next()] == "true"
+inputs[ID_ATTRIBUTE] = argv[input_number.next()]
+inputs[NODE_WEIGHT_ATTRIBUTE] = argv[input_number.next()]
+inputs[IMPEDANCE_ATTRIBUTE] = argv[input_number.next()]
+try: inputs[SEARCH_RADIUS] = float(argv[input_number.next()])
 except: inputs[SEARCH_RADIUS] = INFINITE_RADIUS
-inputs[MAX_NEIGHBOR_SEPARATION] = argv[12]
-try: inputs[BETA] = float(argv[13])
-except: raise Invalid_Input_Exception(BETA)
-inputs[NORMALIZE_RESULTS] = [measure for measure in argv[14].split(";") if measure != "#"]
-inputs[OUTPUT_LOCATION] = argv[15]
-inputs[OUTPUT_FILE_NAME] = argv[16]
-inputs[ACCUMULATOR_ATTRIBUTES] = argv[17]
+inputs[MAX_NEIGHBOR_SEPARATION] = argv[input_number.next()]
+try: inputs[BETA] = float(argv[input_number.next()])
+except: raise Invalid_Input_Exception("Beta")
+inputs[NORMALIZE_RESULTS] = [measure
+                             for measure in argv[input_number.next()].split(";")
+                             if measure != "#"]
+inputs[OUTPUT_LOCATION] = argv[input_number.next()]
+inputs[OUTPUT_FILE_NAME] = argv[input_number.next()]
+inputs[ACCUMULATOR_ATTRIBUTES] = argv[input_number.next()]
 
 # Convert input points to point feature class
-inputs[INPUT_POINTS] = to_point_feature_class(inputs[INPUT_POINTS],
+buildings_type = str(arcpy.Describe(inputs[INPUT_BUILDINGS]).shapeType)
+if not (buildings_type == "Point" or buildings_type == "Polygon"):
+  # Input buildings need to be either points or polygons
+  raise Invalid_Input_Exception("Input Buildings")
+inputs[INPUT_POINTS] = to_point_feature_class(inputs[INPUT_BUILDINGS],
                                               inputs[OUTPUT_LOCATION])
 
 # Output files
@@ -202,7 +214,7 @@ if success:
   arcpy.AddMessage(STEP_5_STARTED)
   try:
     arcpy.CreateTable_management(out_path=inputs[OUTPUT_LOCATION],
-                                  out_name=output_dbf_name)
+                                 out_name=output_dbf_name)
 
     if inputs[ID_ATTRIBUTE] != "FID":
       arcpy.AddField_management(in_table=output_dbf,
@@ -241,7 +253,7 @@ if success:
 if success:
   arcpy.AddMessage(STEP_6_STARTED)
   try:
-    arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_POINTS],
+    arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_BUILDINGS],
                                       out_layer=output_layer)
     # Join |output_dbf| with |output_layer|
     in_field = inputs[ID_ATTRIBUTE]

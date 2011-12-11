@@ -9,7 +9,7 @@ class ToolValidator:
     params = arcpy.GetParameterInfo()
 
     self.inputs = {}
-    self.inputs["input_points"] = params[0];
+    self.inputs["input_buildings"] = params[0];
     self.inputs["input_network"] = params[1];
     self.inputs["compute_reach"] = params[2];
     self.inputs["compute_gravity"] = params[3];
@@ -69,8 +69,8 @@ class ToolValidator:
     """
     # id_attribute
     id_attribute = self.inputs["id_attribute"]
-    input_points = self.inputs["input_points"]
-    if id_attribute.altered or input_points.altered:
+    input_buildings = self.inputs["input_buildings"]
+    if id_attribute.altered or input_buildings.altered:
       if id_attribute.parameterType != "Integer":
         id_attribute.setWarningMessage("Attribute datatype should be Integer")
 

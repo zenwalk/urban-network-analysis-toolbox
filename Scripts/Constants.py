@@ -29,7 +29,7 @@ def index():
     i += 1
 input_number = index()
 
-INPUT_POINTS = input_number.next()
+INPUT_BUILDINGS = input_number.next()
 INPUT_NETWORK = input_number.next()
 COMPUTE_REACH = input_number.next()
 COMPUTE_GRAVITY = input_number.next()
@@ -50,6 +50,8 @@ ACCUMULATOR_ATTRIBUTES = input_number.next()
 # Number of inputs
 INPUT_COUNT = input_number.next()
 
+# We convert input buildings to point feature class
+INPUT_POINTS = "INPUT_POINTS"
 # Name of input points after feature to point conversion
 POINT_FEATURE_CLASS_NAME = lambda feature_class_name: ("%s_FeatureToPoint"
                            % (feature_class_name))

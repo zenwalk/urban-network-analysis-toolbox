@@ -114,7 +114,26 @@ class TestBetweenness(unittest.TestCase):
 
 """
 Closeness
+A
+|\
+| C--D
+|/
+B
 """
+class TestCloseness(unittest.TestCase):
+  def setUp(self):
+    self.graph = construct_graph(["A", "B", "C", "D"],
+                                 [("A", "B", 2),
+                                  ("A", "C", 1),
+                                  ("B", "C", 1),
+                                  ("C", "D", 3)])
+  def test_Closeness(unittest.TestCase):
+    compute_centrality(self.graph, False, False, False, True, False,
+                       INFINITE_RADIUS, 1, [], [])
+    assert eq_tol(getattr(self.graph["A"], CLOSENESS), 1.0/7)
+    assert eq_tol(getattr(self.graph["B"], CLOSENESS), 1.0/7)
+    assert eq_tol(getattr(self.graph["C"], CLOSENESS), 1.0/5)
+    assert eq_tol(getattr(self.graph["D"], CLOSENESS), 1.0/11)
 
 """
 Straightness

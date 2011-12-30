@@ -85,7 +85,6 @@ class TestGravity(unittest.TestCase):
     # Infinite radius, beta = 1
     compute_centrality(self.graph, False, True, False, False, False,
                        INFINITE_RADIUS, 1, [], [])
-    print getattr(self.graph["A"], GRAVITY)
     assert eq_tol(getattr(self.graph["A"], GRAVITY), 1)
     assert eq_tol(getattr(self.graph["B"], GRAVITY), 1)
     assert eq_tol(getattr(self.graph["C"], GRAVITY), 4.0/3)
@@ -93,7 +92,25 @@ class TestGravity(unittest.TestCase):
 
 """
 Betweenness
+A
+ \
+  C--D
+ /
+B
 """
+class TestBetweenness(unittest.TestCase):
+  def setUp(self):
+    self.graph = construct_graph(["A", "B", "C", "D"],
+                                 [("A", "C", 1),
+                                  ("B", "C", 1),
+                                  ("C", "D", 1)])
+  def test_Betweenness(self):
+    compute_centrality(self.graph, False, False, True, False, False,
+                       INFINITE_RADIUS, 1, [], [])
+    assert eq_tol(getattr(self.graph["A"], BETWEENNESS), 0)
+    assert eq_tol(getattr(self.graph["B"], BETWEENNESS), 0)
+    assert eq_tol(getattr(self.graph["C"], BETWEENNESS), 3)
+    assert eq_tol(getattr(self.graph["D"], BETWEENNESS), 0)
 
 """
 Closeness

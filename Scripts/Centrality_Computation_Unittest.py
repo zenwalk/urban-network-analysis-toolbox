@@ -6,34 +6,25 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
-#### REMOVE ME ######
-import sys
-arcpy_needs = ['C:\\Windows\\system32\\python26.zip', u'C:\\Program Files (x86)\\ArcGIS\\Desktop10.0\\arcpy', 'C:\\Python26\\Lib', 'C:\\Python26\\DLLs', 'C:\\Python26\\Lib\\lib-tk', 'C:\\Python26\\ArcGIS10.0\\Lib', 'C:\\Python26\\ArcGIS10.0\\DLLs', 'C:\\Python26\\ArcGIS10.0\\Lib\\lib-tk', 'C:\\Program Files (x86)\\ArcGIS\\Desktop10.0\\Bin', 'C:\\Python26\\ArcGIS10.0', 'C:\\Python26\\ArcGIS10.0\\lib\\site-packages', 'C:\\Program Files (x86)\\ArcGIS\\Desktop10.0\\arcpy', 'C:\\Program Files (x86)\\ArcGIS\\Desktop10.0\\ArcToolbox\\Scripts']
-for thing in arcpy_needs:
-  sys.path.append(thing)
-#### REMOVE ME ######
-
 from Centrality_Computation import compute_centrality
 from Constants import *
-from math import log
+from math import log, sqrt
 from Node import Node
 import unittest
 from Utils import *
 
 def construct_graph(node_ids, edges):
   """
-  Constructs a weighted, undirected graph with the given nodes and edges.
-  A graph is represented by a dictionary with the node ids as keys and Node objects
-    as values.
+  Constructs a weighted, undirected graph.
   """
   graph = {}
   # Nodes
   for id in node_ids:
     graph[id] = Node()
   # Edges
-  for (u, v, dist) in edges:
-    graph[u].add_neighbor(v, dist)
-    graph[v].add_neighbor(u, dist)
+  for (u, v, weight) in edges:
+    graph[u].add_neighbor(v, weight)
+    graph[v].add_neighbor(u, weight)
   return graph
 
 """
@@ -127,7 +118,7 @@ class TestCloseness(unittest.TestCase):
                                   ("A", "C", 1),
                                   ("B", "C", 1),
                                   ("C", "D", 3)])
-  def test_Closeness(unittest.TestCase):
+  def test_Closeness(self):
     compute_centrality(self.graph, False, False, False, True, False,
                        INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], CLOSENESS), 1.0/7)
@@ -137,7 +128,33 @@ class TestCloseness(unittest.TestCase):
 
 """
 Straightness
+  |
+ 1| A
+  | |\
+ 0| | C--D
+  | |/
+-1| B
+   --------
+   -1 0  1 
 """
+class TestStraightness(unittest.TestCase):
+  def setUp(self):
+    self.graph = construct_graph(["A", "B", "C", "D"],
+                                 [("A", "B", 2),
+                                  ("A", "C", sqrt(2)),
+                                  ("B", "C", sqrt(2)),
+                                  ("C", "D", 1)])
+    setattr(self.graph["A"], LOCATION, (-1, 1))
+    setattr(self.graph["B"], LOCATION, (-1, -1))
+    setattr(self.graph["C"], LOCATION, (0, 0))
+    setattr(self.graph["D"], LOCATION, (1, 0))
+  def test_Straightness(self):
+    compute_centrality(self.graph, False, False, False, False, True,
+                       INFINITE_RADIUS, 1, [], [])
+    assert eq_tol(getattr(self.graph["A"], STRAIGHTNESS), 2+sqrt(5)/(1+sqrt(2)))
+    assert eq_tol(getattr(self.graph["B"], STRAIGHTNESS), 2+sqrt(5)/(1+sqrt(2)))
+    assert eq_tol(getattr(self.graph["C"], STRAIGHTNESS), 3)
+    assert eq_tol(getattr(self.graph["D"], STRAIGHTNESS), 1+2*sqrt(5)/(1+sqrt(2)))
 
 if __name__ == "__main__":
   unittest.main()

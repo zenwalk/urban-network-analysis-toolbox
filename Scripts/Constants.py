@@ -70,6 +70,9 @@ WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d inpu
 WARNING_NO_NODES = "No nodes in graph"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 
+POINT_CONVERSION_STARTED = "... [started] Converting polygons to network locations"
+POINT_CONVERSION_FINISHED = "... [finished]"
+
 ADJACENCY_LIST_COMPUTED = "Adjacency list already computed on previous run"
 
 BARRIER_COST_PRE_PROCESSING = "Barrier cost computation pre-processing"

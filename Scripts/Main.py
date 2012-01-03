@@ -55,11 +55,18 @@ inputs[ACCUMULATOR_ATTRIBUTES] = argv[input_number.next()]
 
 # Convert input points to point feature class
 buildings_type = str(arcpy.Describe(inputs[INPUT_BUILDINGS]).shapeType)
-if not (buildings_type == "Point" or buildings_type == "Polygon"):
+if buildings_type == "Point":
+  # Input buildings are already point feature class
+  inputs[INPUT_POINTS] = inputs[INPUT_BUILDINGS]
+elif buildings_type == "Polygon":
+  # Input buildings need to be converted to point feature class 
+  arcpy.AddMessage(POINT_CONVERSION_STARTED)
+  inputs[INPUT_POINTS] = to_point_feature_class(inputs[INPUT_BUILDINGS],
+                                                inputs[OUTPUT_LOCATION])
+  arcpy.AddMessage(POINT_CONVERSION_FINISHED) 
+else:
   # Input buildings need to be either points or polygons
   raise Invalid_Input_Exception("Input Buildings")
-inputs[INPUT_POINTS] = to_point_feature_class(inputs[INPUT_BUILDINGS],
-                                              inputs[OUTPUT_LOCATION])
 
 # Output files
 output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]

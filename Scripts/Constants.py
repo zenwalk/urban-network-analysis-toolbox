@@ -54,8 +54,8 @@ INPUT_COUNT = input_number.next()
 # We convert input buildings to point feature class
 INPUT_POINTS = "INPUT_POINTS"
 # Name of input points after feature to point conversion
-POINT_FEATURE_CLASS_NAME = lambda feature_class_name: ("%s_FeatureToPoint"
-                           % (feature_class_name))
+POINT_FEATURE_CLASS_NAME = lambda feature_class_name, point_location: ("%s_%s_FeatureToPoint"
+                           % (feature_class_name, point_location))
 
 """
 Console messages
@@ -73,6 +73,7 @@ WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 
 POINT_CONVERSION_STARTED = "... [started] Converting polygons to network locations"
 POINT_CONVERSION_FINISHED = "... [finished]"
+POINT_CONVERSION_DONE = "Conversion has already been done"
 
 ADJACENCY_LIST_COMPUTED = "Adjacency list already computed on previous run"
 

@@ -78,11 +78,14 @@ def to_point_feature_class(feature_class, point_location, location):
   |location|: the directory in which the new file is saved
   """
   feature_class_name = str(arcpy.Describe(feature_class).baseName)
-  point_feature_class_name = POINT_FEATURE_CLASS_NAME(feature_class_name)
+  point_feature_class_name = POINT_FEATURE_CLASS_NAME(feature_class_name, point_location)
   point_feature_class = "%s.shp" % (join(location, point_feature_class_name))
-  arcpy.FeatureToPoint_management(in_features=feature_class,
-                                  out_feature_class=point_feature_class,
-				  point_location=point_location)
+  if arcpy.Exists(point_feature_class):
+    arcpy.AddMessage(POINT_CONVERSION_DONE)
+  else:
+    arcpy.FeatureToPoint_management(in_features=feature_class,
+                                    out_feature_class=point_feature_class,
+                                    point_location=point_location)
   return point_feature_class
 
 def eq_tol(a, b):

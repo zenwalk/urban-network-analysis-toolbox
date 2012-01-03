@@ -257,7 +257,7 @@ if success:
                                       out_layer=output_layer)
     # Join |output_dbf| with |output_layer|
     in_field = inputs[ID_ATTRIBUTE]
-    join_field = "OID" if in_field == "FID" else inputs[ID_ATTRIBUTE]
+    join_field = "OID" if in_field == "FID" else in_field
     arcpy.AddJoin_management(output_layer, in_field,
                              output_dbf, join_field)
 

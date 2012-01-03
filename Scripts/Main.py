@@ -32,6 +32,7 @@ def index():
 input_number = index()
 inputs = {}
 inputs[INPUT_BUILDINGS] = argv[input_number.next()]
+inputs[POINT_LOCATION] = "INSIDE" if argv[input_number.next()] == "true" else "CENTROID"
 inputs[INPUT_NETWORK] = argv[input_number.next()]
 inputs[COMPUTE_REACH] = argv[input_number.next()] == "true"
 inputs[COMPUTE_GRAVITY] = argv[input_number.next()] == "true"
@@ -62,6 +63,7 @@ elif buildings_type == "Polygon":
   # Input buildings need to be converted to point feature class 
   arcpy.AddMessage(POINT_CONVERSION_STARTED)
   inputs[INPUT_POINTS] = to_point_feature_class(inputs[INPUT_BUILDINGS],
+                                                inputs[POINT_LOCATION],
                                                 inputs[OUTPUT_LOCATION])
   arcpy.AddMessage(POINT_CONVERSION_FINISHED) 
 else:

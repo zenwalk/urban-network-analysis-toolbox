@@ -9,23 +9,24 @@ class ToolValidator:
     params = arcpy.GetParameterInfo()
 
     self.inputs = {}
-    self.inputs["input_buildings"] = params[0];
-    self.inputs["input_network"] = params[1];
-    self.inputs["compute_reach"] = params[2];
-    self.inputs["compute_gravity"] = params[3];
-    self.inputs["compute_betweenness"] = params[4];
-    self.inputs["compute_closeness"] = params[5];
-    self.inputs["compute_straightness"] = params[6];
-    self.inputs["id_attribute"] = params[7];
-    self.inputs["node_weight_attribute"] = params[8];
-    self.inputs["impedance_attribute"] = params[9];
-    self.inputs["search_radius"] = params[10];
-    self.inputs["max_neighbor_separation"] = params[11];
-    self.inputs["beta"] = params[12];
-    self.inputs["normalize_results"] = params[13];
-    self.inputs["output_location"] = params[14];
-    self.inputs["output_file_name"] = params[15];
-    self.inputs["accumulator_attributes"] = params[16];
+    self.inputs["input_buildings"] = params[0]
+    self.inputs["point_location"] = params[1]
+    self.inputs["input_network"] = params[2]
+    self.inputs["compute_reach"] = params[3]
+    self.inputs["compute_gravity"] = params[4]
+    self.inputs["compute_betweenness"] = params[5]
+    self.inputs["compute_closeness"] = params[6]
+    self.inputs["compute_straightness"] = params[7]
+    self.inputs["id_attribute"] = params[8]
+    self.inputs["node_weight_attribute"] = params[9]
+    self.inputs["impedance_attribute"] = params[10]
+    self.inputs["search_radius"] = params[11]
+    self.inputs["max_neighbor_separation"] = params[12]
+    self.inputs["beta"] = params[13]
+    self.inputs["normalize_results"] = params[14]
+    self.inputs["output_location"] = params[15]
+    self.inputs["output_file_name"] = params[16]
+    self.inputs["accumulator_attributes"] = params[17]
 
   def initializeParameters(self):
     """
@@ -33,11 +34,19 @@ class ToolValidator:
     """
     self.inputs["accumulator_attributes"].category = "Accumulators"
     self.inputs["normalize_results"].category = "Normalization"
+    self.inputs["point_location"].enabled = False
 
   def updateParameters(self):
     """
     Called whenever a parameter has been changed
     """
+    # point_location
+    try:
+      buildings_type = str(arcpy.Describe(self.inputs["input_buildings"].value).shapeType)
+      self.inputs["point_location"].enabled = buildings_type == "Polygon"
+    except:
+      pass   
+
     # impedance_attribute
     network = self.inputs["input_network"]
     if network.altered:

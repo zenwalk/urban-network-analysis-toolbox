@@ -30,6 +30,7 @@ def index():
 input_number = index()
 
 INPUT_BUILDINGS = input_number.next()
+POINT_LOCATION = input_number.next()
 INPUT_NETWORK = input_number.next()
 COMPUTE_REACH = input_number.next()
 COMPUTE_GRAVITY = input_number.next()

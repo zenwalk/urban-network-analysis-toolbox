@@ -70,18 +70,19 @@ class Progress_Bar:
       count += 1
       yield
 
-def to_point_feature_class(feature_class, location):
+def to_point_feature_class(feature_class, point_location, location):
   """
   Converts |feature_class| to point feature class
   Returns the name of the newly created point feature class
-  Saves the new file at |location|
+  |point_location|: parameter for conversion, should be "CENTROID" or "INSIDE"
+  |location|: the directory in which the new file is saved
   """
   feature_class_name = str(arcpy.Describe(feature_class).baseName)
   point_feature_class_name = POINT_FEATURE_CLASS_NAME(feature_class_name)
   point_feature_class = "%s.shp" % (join(location, point_feature_class_name))
   arcpy.FeatureToPoint_management(in_features=feature_class,
                                   out_feature_class=point_feature_class,
-				  point_location="CENTROID")
+				  point_location=point_location)
   return point_feature_class
 
 def eq_tol(a, b):

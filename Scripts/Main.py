@@ -12,7 +12,7 @@ import arcgisscripting
 from Centrality_Computation import compute_centrality
 from Constants import *
 from Node import Node
-from os.path import basename, join, splitext
+from os.path import join
 from sys import argv
 from Utils import *
 
@@ -62,10 +62,13 @@ if buildings_description.shapeType == "Point":
   inputs[INPUT_POINTS] = inputs[INPUT_BUILDINGS]
 elif buildings_description.shapeType == "Polygon":
   # Input buildings need to be converted to point feature class
-  point_feature_class_name = POINT_FEATURE_CLASS_NAME(buildings_description.baseName,
+  point_feature_class_name = POINT_FEATURE_CLASS_NAME(basename(inputs[INPUT_BUILDINGS]),
                                                       inputs[POINT_LOCATION])
   inputs[INPUT_POINTS] = "%s.shp" % join(inputs[OUTPUT_LOCATION],
                                          point_feature_class_name)
+  # If FID is used as ID attribute, we need to change it since a new shapefile will be in use
+  if inputs[ID_ATTRIBUTE] == "FID":
+    inputs[ID_ATTRIBUTE] = ORIGINAL_FID
 else:
   # Input buildings need to be either points or polygons
   raise Invalid_Input_Exception("Input Buildings")
@@ -81,8 +84,8 @@ if arcpy.Exists(output_dbf) or arcpy.Exists(output_layer):
 # Adjacency List table
 adj_dbf_name = ("%s_%s_%s_%s_%s_%s_%s.dbf" %
                 (ADJACENCY_LIST_NAME,
-                 splitext(basename(inputs[INPUT_POINTS]))[0],
-                 arcpy.Describe(inputs[INPUT_NETWORK]).baseName,
+                 basename(inputs[INPUT_POINTS]),
+                 basename(inputs[INPUT_NETWORK]),
                  inputs[ID_ATTRIBUTE],
                  inputs[IMPEDANCE_ATTRIBUTE],
                  inputs[ACCUMULATOR_ATTRIBUTES],
@@ -129,7 +132,7 @@ try:
   if success:
     arcpy.AddMessage(STEP_1_STARTED)
     # If necessary, convert input buildings to point feature class
-    if inputs[INPUT_BUILDINGS] != inputs[INPUT_POINTS]:
+    if buildings_description.shapeType == "Polygon":
       arcpy.AddMessage(POINT_CONVERSION_STARTED)
       to_point_feature_class(inputs[INPUT_BUILDINGS],
                              inputs[INPUT_POINTS],
@@ -268,11 +271,10 @@ try:
       arcpy.CreateTable_management(out_path=inputs[OUTPUT_LOCATION],
                                    out_name=output_dbf_name)
 
-      if inputs[ID_ATTRIBUTE] != "FID":
-        arcpy.AddField_management(in_table=output_dbf,
-                                  field_name=trim(inputs[ID_ATTRIBUTE]),
-                                  field_type="TEXT",
-                                  field_is_nullable="NON_NULLABLE")
+      arcpy.AddField_management(in_table=output_dbf,
+                                field_name=UNA_ID,
+                                field_type="TEXT",
+                                field_is_nullable="NON_NULLABLE")
 
       test_node = nodes.values()[0]
       measures = set([measure for measure in dir(test_node) \
@@ -288,8 +290,7 @@ try:
       rows = arcpy.InsertCursor(output_dbf)
       for id in nodes:
         row = rows.newRow()
-        if inputs[ID_ATTRIBUTE] != "FID":
-          row.setValue(trim(inputs[ID_ATTRIBUTE]), str(id))
+        row.setValue(UNA_ID, str(id))
         for measure in measures:
           row.setValue(trim(measure), getattr(nodes[id], measure))
         rows.insertRow(row)
@@ -308,8 +309,11 @@ try:
       arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_BUILDINGS],
                                         out_layer=output_layer)
       # Join |output_dbf| with |output_layer|
-      in_field = inputs[ID_ATTRIBUTE]
-      join_field = "OID" if in_field == "FID" else in_field
+      if buildings_description.shapeType == "Polygon" and inputs[ID_ATTRIBUTE] == ORIGINAL_FID:
+        in_field = "FID" 
+      else:
+        in_field = inputs[ID_ATTRIBUTE]
+      join_field = UNA_ID
       arcpy.AddJoin_management(output_layer, in_field,
                                output_dbf, join_field)
 

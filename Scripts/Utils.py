@@ -9,6 +9,8 @@
 import arcpy
 from Constants import *
 from math import sqrt
+from os.path import basename as os_basename
+from os.path import splitext
 
 class Invalid_Input_Exception(Exception):
   """
@@ -93,6 +95,12 @@ def lt_tol(a, b):
   """
   return b - a > TOLERANCE
 
+def basename(path):
+  """
+  Returns the base name of |path|, not including the extension
+  """
+  return splitext(os_basename(path))[0]
+
 def trim(field_name):
   """
   Returns the first 10 characters of |field_name|
@@ -116,7 +124,7 @@ def merge_maps(map1, map2, f):
   |map1| and |map2| must have the same keys
   """
   if set(map1.keys()) != set(map2.keys()):
-    raise Exception("Invalid input to |merge_maps|")
+    raise Exception("Invalid input, dictionaries must have the same keys")
   comb_map = {}
   for key in map1:
     comb_map[key] = f(map1[key], map2[key])

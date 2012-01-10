@@ -164,6 +164,11 @@ RASTER_NAME = "Raster"
 INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
 OD_COST_MATRIX_LINES = "Lines"
 
+# Name of the ID column in the output dbf
+UNA_ID = "UNA_ID"
+# Name of the column that stores the original FID of polygons when converting to points
+ORIGINAL_FID = "ORIG_FID"
+
 """
 Representation for an infinite radius (or infinite extent on the network)
 """

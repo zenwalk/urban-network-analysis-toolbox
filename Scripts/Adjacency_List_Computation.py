@@ -14,6 +14,7 @@ from Utils import *
 
 arcpy.env.overwriteOutput = True # Enable overwriting
 
+# TODO(mikemeko): remove max_neighbor_separation
 def compute_adjacency_list(input_points,
                            input_network,
                            id_attribute,
@@ -127,6 +128,7 @@ def compute_adjacency_list(input_points,
                polygons_layer,
                input_points_layer,
                od_cost_matrix_lines]:
+    # TODO(mikemeko): should have a delete method in utils
     if arcpy.Exists(file):
       arcpy.Delete_management(file)
 
@@ -174,6 +176,33 @@ def compute_adjacency_list(input_points,
     arcpy.MakeFeatureLayer_management(in_features=feature,
                                       out_layer=layer)
 
+  def add_locations(sub_layer, field_mappings=""):
+    """
+    |sub_layer|: one of "Origins", "Destinations", "Barrier Points"
+    |field_mappings|: field mappings in addition to those for "Name" and "CurbApproach"
+    """
+    arcpy.AddLocations_na(in_network_analysis_layer=od_cost_matrix_layer,
+                          sub_layer=sub_layer,
+                          in_table=input_points_layer,
+                          field_mappings="Name %s #; CurbApproach # 0; %s" % (id_attribute, field_mappings),
+                          search_tolerance=SEARCH_TOLERANCE,
+                          search_criteria="%s SHAPE; %s SHAPE;" % (junction_feature, edge_feature),
+                          append="CLEAR",
+                          snap_to_position_along_network="SNAP",
+                          snap_offset=SNAP_OFFSET)
+
+  # Destinations
+  arcpy.AddMessage("Adding destinations")
+  arcpy.SelectLayerByLocation_management(in_layer=input_points_layer,
+                                         search_distance=search_radius)
+  add_locations("Destinations")
+
+  # Point barriers
+  arcpy.AddMessage("Adding point barriers")
+  add_locations("Point Barriers", ("FullEdge # 0;"
+                                   "BarrierType # 2;"
+                                   "Attr_%s %s #;" % (impedance_attribute, trim(BARRIER_COST_FIELD))))
+
   # Compute adjacency list, one raster cell at a time
   progress = Progress_Bar(raster_cell_count, 1, STEP_1)
   rows = arcpy.UpdateCursor(polygons)
@@ -183,36 +212,10 @@ def compute_adjacency_list(input_points,
                                             selection_type="NEW_SELECTION",
                                             where_clause="FID = %s" % str(row.FID))
 
-    """
-    |sub_layer|: one of "Origins", "Destinations", "Barrier Points"
-    |field_mappings|: field mappings in addition to those for "Name" and "CurbApproach"
-    """
-    def add_locations(sub_layer, field_mappings=""):
-      arcpy.AddLocations_na(in_network_analysis_layer=od_cost_matrix_layer,
-                            sub_layer=sub_layer,
-                            in_table=input_points_layer,
-                            field_mappings="Name %s #; CurbApproach # 0; %s" % (id_attribute, field_mappings),
-                            search_tolerance=SEARCH_TOLERANCE,
-                            search_criteria="%s SHAPE; %s SHAPE;" % (junction_feature, edge_feature),
-                            append="CLEAR",
-                            snap_to_position_along_network="SNAP",
-                            snap_offset=SNAP_OFFSET)
-
     # Origins
     arcpy.SelectLayerByLocation_management(in_layer=input_points_layer,
                                            select_features=polygons_layer)
     add_locations("Origins")
-
-    # Destinations
-    arcpy.SelectLayerByLocation_management(in_layer=input_points_layer,
-                                           select_features=polygons_layer,
-                                           search_distance=max_neighbor_separation)
-    add_locations("Destinations")
-
-    # Point barriers
-    add_locations("Point Barriers", ("FullEdge # 0;"
-                                     "BarrierType # 2;"
-                                     "Attr_%s %s #;" % (impedance_attribute, trim(BARRIER_COST_FIELD))))
 
     # Solve OD Cost matrix
     arcpy.Solve_na(in_network_analysis_layer=od_cost_matrix_layer,

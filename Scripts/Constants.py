@@ -104,10 +104,6 @@ STEP_6_STARTED = "[6 started] %s" % STEP_6
 STEP_6_FAILED = "[6 failed]"
 STEP_6_FINISHED = "[6 finished]"
 
-CLEANUP_STARTED = "... [started] Clean up"
-CLEANUP_FAILED = "... [failed]"
-CLEANUP_FINISHED = "... [finished]"
-
 SUCCESS = "Successful!"
 FAILURE = "Not successful"
 
@@ -144,7 +140,7 @@ JUNCTION_FEATURE = ("JunctionFeature", "SystemJunction")
 # Network location field names
 NETWORK_LOCATION_FIELDS = ("SourceID", "SourceOID", "PosAlong", "SideOfEdge", "SnapX", "SnapY", "Distance")
 # Number of input points per raster cell
-POINTS_PER_RASTER_CELL = 500
+POINTS_PER_RASTER_CELL = 600
 # High cost assigned to buildings to stop neighbor search when a building is encountered
 BARRIER_COST_FIELD = "Barrier_Cost"
 BARRIER_COST = (maxint / 5) * 2

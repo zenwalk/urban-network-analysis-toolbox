@@ -7,10 +7,40 @@
 # -------------------------------------------------------------------------------------
 
 import arcpy
-from Constants import *
+from Constants import AUXILIARY_DIR_NAME
+from Constants import BARRIER_COST
+from Constants import BARRIER_COST_COMPUTATION
+from Constants import BARRIER_COST_COMPUTATION_FINISHED
+from Constants import BARRIER_COST_COMPUTATION_STARTED
+from Constants import BARRIER_COST_FIELD
+from Constants import BARRIER_COST_PRE_PROCESSING
+from Constants import CALCULATE_LOCATIONS_FINISHED
+from Constants import CALCULATE_LOCATIONS_STARTED
+from Constants import DESTINATION_ID_FIELD_NAME
+from Constants import EDGE_FEATURE
+from Constants import INPUT_POINTS_LAYER_NAME
+from Constants import JUNCTION_FEATURE
+from Constants import NETWORK_LOCATION_FIELDS
+from Constants import OD_COST_MATRIX_LAYER_NAME
+from Constants import OD_COST_MATRIX_LINES
+from Constants import ORIGIN_ID_FIELD_NAME
+from Constants import PARTIAL_ADJACENCY_LIST_NAME
+from Constants import POINTS_PER_RASTER_CELL
+from Constants import POLYGONS_LAYER_NAME
+from Constants import POLYGONS_SHAPEFILE_NAME
+from Constants import RASTER_NAME
+from Constants import SEARCH_TOLERANCE
+from Constants import SNAP_OFFSET
+from Constants import STEP_1
+from Constants import WARNING_NO_EDGE_FEATURE
+from Constants import WARNING_NO_JUNCTION_FEATURE
+from math import sqrt
 from os import mkdir
 from os.path import join
-from Utils import *
+from Utils import Invalid_Input_Exception
+from Utils import Progress_Bar
+from Utils import row_has_field
+from Utils import trim
 
 arcpy.env.overwriteOutput = True # Enable overwriting
 

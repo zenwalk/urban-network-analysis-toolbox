@@ -6,11 +6,31 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
-from Constants import *
-import heapq
+from Constants import BETWEENNESS
+from Constants import CLOSENESS
+from Constants import GRAVITY
+from Constants import LOCATION
+from Constants import NEIGHBORS
+from Constants import NORM_BETWEENNESS
+from Constants import NORM_CLOSENESS
+from Constants import NORM_GRAVITY
+from Constants import NORM_REACH
+from Constants import NORM_STRAIGHTNESS
+from Constants import PROGRESS_NORMALIZATION
+from Constants import REACH
+from Constants import STEP_4
+from Constants import STRAIGHTNESS
+from Constants import WEIGHT
+from heapq import heapify
+from heapq import heappop
+from heapq import heappush
 from math import exp
 from operator import add
-from Utils import *
+from Utils import dist
+from Utils import eq_tol
+from Utils import lt_tol
+from Utils import merge_maps
+from Utils import Progress_Bar
 
 def compute_centrality(nodes,
                        compute_r, compute_g, compute_b, compute_c, compute_s,
@@ -82,7 +102,7 @@ def compute_centrality(nodes,
     # Dijkstra
     while Q:
       # Pop the closest node to |s| from |Q|
-      d_sv, v = heapq.heappop(Q)
+      d_sv, v = heappop(Q)
       weight_v = getattr(nodes[v], WEIGHT)
       if have_locations: location_v = getattr(nodes[v], LOCATION)
 
@@ -102,7 +122,7 @@ def compute_centrality(nodes,
 
         if not w in d: # Found a path from |s| to |w| for the first time
           if d_sw <= radius:
-            heapq.heappush(Q, (d_sw, w)) # Add |w| to |Q|
+            heappush(Q, (d_sw, w)) # Add |w| to |Q|
             if have_accumulations:
               accumulations_s[w] = merge_maps(accumulations_s[v], dict(accumulations_vw), add)
           d[w] = d_sw
@@ -112,8 +132,8 @@ def compute_centrality(nodes,
           if d_sw <= radius:
             if d[w] <= radius:
               Q.remove((d[w], w))
-              heapq.heapify(Q)
-            heapq.heappush(Q, (d_sw, w)) # Add |w| to |Q|
+              heapify(Q)
+            heappush(Q, (d_sw, w)) # Add |w| to |Q|
             if have_accumulations:
               accumulations_s[w] = merge_maps(accumulations_s[v], dict(accumulations_vw), add)
           d[w] = d_sw

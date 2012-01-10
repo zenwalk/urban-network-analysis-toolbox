@@ -7,11 +7,18 @@
 # -------------------------------------------------------------------------------------
 
 from Centrality_Computation import compute_centrality
-from Constants import *
-from math import log, sqrt
+from Constants import INFINITE_RADIUS
+from Constants import BETWEENNESS
+from Constants import CLOSENESS
+from Constants import GRAVITY
+from Constants import LOCATION
+from Constants import REACH
+from Constants import STRAIGHTNESS
+from math import log
+from math import sqrt
 from Node import Node
 import unittest
-from Utils import *
+from Utils import eq_tol
 
 def construct_graph(node_ids, edges):
   """

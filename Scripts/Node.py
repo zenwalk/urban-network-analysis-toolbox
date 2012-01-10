@@ -6,7 +6,8 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
-from Constants import *
+from Constants import NEIGHBORS
+from Constants import WEIGHT
 
 class Node:
   """

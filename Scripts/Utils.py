@@ -7,7 +7,8 @@
 # -------------------------------------------------------------------------------------
 
 import arcpy
-from Constants import *
+from Constants import POINT_CONVERSION_DONE
+from Constants import TOLERANCE
 from math import sqrt
 from os.path import basename as os_basename
 from os.path import splitext

@@ -37,6 +37,7 @@ from Constants import WARNING_NO_JUNCTION_FEATURE
 from math import sqrt
 from os import mkdir
 from os.path import join
+from Utils import delete
 from Utils import Invalid_Input_Exception
 from Utils import Progress_Bar
 from Utils import row_has_field
@@ -149,7 +150,7 @@ def compute_adjacency_list(input_points,
   input_points_layer = join(auxiliary_dir, INPUT_POINTS_LAYER_NAME)
 
   # Make sure none of these files already exists
-  for file in [od_cost_matrix_layer,
+  for path in [od_cost_matrix_layer,
                temp_adj_dbf,
                adj_dbf,
                partial_adj_dbf,
@@ -158,9 +159,7 @@ def compute_adjacency_list(input_points,
                polygons_layer,
                input_points_layer,
                od_cost_matrix_lines]:
-    # TODO(mikemeko): should have a delete method in utils
-    if arcpy.Exists(file):
-      arcpy.Delete_management(file)
+    delete(path)
 
   # Cutoff radius for OD matrix computation
   cutoff_radius = 2 * BARRIER_COST + min(search_radius, BARRIER_COST / 2)
@@ -281,12 +280,11 @@ def compute_adjacency_list(input_points,
                           out_data=adj_dbf)
 
   # Clean up
-  for file in [od_cost_matrix_layer,
+  for path in [od_cost_matrix_layer,
                partial_adj_dbf,
                polygons,
                raster,
                polygons_layer,
                input_points_layer,
                auxiliary_dir]:
-    if arcpy.Exists(file):
-      arcpy.Delete_management(file)
+    delete(path)

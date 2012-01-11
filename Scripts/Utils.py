@@ -10,7 +10,11 @@ import arcpy
 from Constants import POINT_CONVERSION_DONE
 from Constants import TOLERANCE
 from math import sqrt
+from os import remove
+from os import rmdir
 from os.path import basename as os_basename
+from os.path import isfile
+from os.path import isdir
 from os.path import splitext
 
 class Invalid_Input_Exception(Exception):
@@ -101,6 +105,24 @@ def basename(path):
   Returns the base name of |path|, not including the extension
   """
   return splitext(os_basename(path))[0]
+
+def delete(path):
+  """
+  Deletes the file or directory located at |path|
+  """
+  try:
+    # Attempt to delete using arcpy methods
+    if arcpy.Exists(path):
+      arcpy.Delete_management(path)
+  except:
+    # If arcpy methods fail, attempt to delete using native methods
+    try:
+      if isfile(path):
+        remove(path)
+      elif isdir(path):
+        rmdir(path)
+    except:
+      pass
 
 def trim(field_name):
   """

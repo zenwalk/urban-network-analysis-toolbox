@@ -83,6 +83,7 @@ from Node import Node
 from os.path import join
 from sys import argv
 from Utils import basename
+from Utils import delete
 from Utils import Invalid_Input_Exception
 from Utils import is_accumulator_field
 from Utils import Progress_Bar
@@ -169,12 +170,6 @@ def clean_up():
   """
   Removes all auxiliary files
   """
-  def delete(path):
-    """
-    Deletes the file or directory located at |path|
-    """
-    if arcpy.Exists(path):
-      arcpy.Delete_management(path)
   auxiliary_dir = join(inputs[OUTPUT_LOCATION], AUXILIARY_DIR_NAME)
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(auxiliary_dir, OD_COST_MATRIX_LINES)
@@ -418,5 +413,4 @@ try:
   else: arcpy.AddMessage(FAILURE)
 
 except arcgisscripting.ExecuteAbort:
-  # TODO(mikemeko): this needs work, arcpy.Delete_management cannot be called here
   clean_up()

@@ -44,7 +44,7 @@ class ToolValidator:
       buildings_type = str(arcpy.Describe(self.inputs["input_buildings"].value).shapeType)
       self.inputs["point_location"].enabled = buildings_type == "Polygon"
     except:
-      pass   
+      pass
 
     # impedance_attribute
     network = self.inputs["input_network"]

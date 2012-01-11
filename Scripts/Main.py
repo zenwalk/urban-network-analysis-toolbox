@@ -374,7 +374,7 @@ try:
                                         out_layer=output_layer)
       # Join |output_dbf| with |output_layer|
       if buildings_description.shapeType == "Polygon" and inputs[ID_ATTRIBUTE] == ORIGINAL_FID:
-        in_field = "FID" 
+        in_field = "FID"
       else:
         in_field = inputs[ID_ATTRIBUTE]
       join_field = UNA_ID

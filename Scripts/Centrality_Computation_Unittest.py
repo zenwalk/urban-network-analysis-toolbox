@@ -142,7 +142,7 @@ Straightness
   | |/
 -1| B
    --------
-   -1 0  1 
+   -1 0  1
 """
 class TestStraightness(unittest.TestCase):
   def setUp(self):

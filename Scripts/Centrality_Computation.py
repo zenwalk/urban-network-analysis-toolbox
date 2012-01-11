@@ -85,7 +85,7 @@ def compute_centrality(nodes,
 
     # Initialize measures
     if compute_g: gravity_s = 0.0
-    if compute_b: 
+    if compute_b:
       P = {s: []} # Predecessors
       S = [] # Stack containing nodes in the order they are extended
       sigma = {s: 1.0} # Number of shortest paths from |s| to other nodes

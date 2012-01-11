@@ -6,6 +6,10 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+"""
+Script for adjacency list computation.
+"""
+
 import arcpy
 from Constants import ADDING_DESTINATIONS_STARTED
 from Constants import ADDING_DESTINATIONS_FINISHED

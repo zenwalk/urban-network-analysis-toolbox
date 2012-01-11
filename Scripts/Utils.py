@@ -6,6 +6,10 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+"""
+Utility methods.
+"""
+
 import arcpy
 from Constants import POINT_CONVERSION_DONE
 from Constants import TOLERANCE

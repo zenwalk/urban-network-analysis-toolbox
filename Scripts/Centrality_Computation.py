@@ -6,6 +6,10 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+"""
+Script for the computation of the five centrality metrics.
+"""
+
 from Constants import BETWEENNESS
 from Constants import CLOSENESS
 from Constants import GRAVITY

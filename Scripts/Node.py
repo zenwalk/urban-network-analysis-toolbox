@@ -6,6 +6,10 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+"""
+Script for representation of a weighted, undirected graph.
+"""
+
 from Constants import NEIGHBORS
 from Constants import WEIGHT
 

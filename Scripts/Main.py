@@ -6,6 +6,10 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+"""
+Script for taking in the inputs to the toolbox and returning its outputs.
+"""
+
 from Adjacency_List_Computation import compute_adjacency_list
 import arcpy
 import arcgisscripting

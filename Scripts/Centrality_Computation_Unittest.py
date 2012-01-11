@@ -6,6 +6,10 @@
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
 # -------------------------------------------------------------------------------------
 
+"""
+Unittest for the centrality metric computation.
+"""
+
 from Centrality_Computation import compute_centrality
 from Constants import INFINITE_RADIUS
 from Constants import BETWEENNESS

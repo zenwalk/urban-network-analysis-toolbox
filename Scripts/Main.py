@@ -33,7 +33,6 @@ from Constants import INPUT_POINTS
 from Constants import INPUT_POINTS_LAYER_NAME
 from Constants import layer_name
 from Constants import LOCATION
-from Constants import MAX_NEIGHBOR_SEPARATION
 from Constants import NODE_WEIGHT_ATTRIBUTE
 from Constants import NORMALIZE_RESULTS
 from Constants import OD_COST_MATRIX_LAYER_NAME
@@ -119,7 +118,6 @@ inputs[NODE_WEIGHT_ATTRIBUTE] = argv[input_number.next()]
 inputs[IMPEDANCE_ATTRIBUTE] = argv[input_number.next()]
 try: inputs[SEARCH_RADIUS] = float(argv[input_number.next()])
 except: inputs[SEARCH_RADIUS] = INFINITE_RADIUS
-inputs[MAX_NEIGHBOR_SEPARATION] = argv[input_number.next()]
 try: inputs[BETA] = float(argv[input_number.next()])
 except: raise Invalid_Input_Exception("Beta")
 inputs[NORMALIZE_RESULTS] = [measure
@@ -156,14 +154,13 @@ if arcpy.Exists(output_dbf) or arcpy.Exists(output_layer):
   arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
   success = False
 # Adjacency List table
-adj_dbf_name = ("%s_%s_%s_%s_%s_%s_%s.dbf" %
+adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" %
                 (ADJACENCY_LIST_NAME,
                  basename(inputs[INPUT_POINTS]),
                  basename(inputs[INPUT_NETWORK]),
                  inputs[ID_ATTRIBUTE],
                  inputs[IMPEDANCE_ATTRIBUTE],
-                 inputs[ACCUMULATOR_ATTRIBUTES],
-                 inputs[MAX_NEIGHBOR_SEPARATION]))
+                 inputs[ACCUMULATOR_ATTRIBUTES]))
 adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
 def clean_up():
@@ -217,7 +214,6 @@ try:
                                inputs[IMPEDANCE_ATTRIBUTE],
                                inputs[ACCUMULATOR_ATTRIBUTES],
                                inputs[SEARCH_RADIUS],
-                               inputs[MAX_NEIGHBOR_SEPARATION],
                                inputs[OUTPUT_LOCATION],
                                adj_dbf_name)
         arcpy.AddMessage(STEP_1_FINISHED)

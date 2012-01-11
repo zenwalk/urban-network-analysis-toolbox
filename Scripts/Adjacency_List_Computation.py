@@ -45,14 +45,12 @@ from Utils import trim
 
 arcpy.env.overwriteOutput = True # Enable overwriting
 
-# TODO(mikemeko): remove max_neighbor_separation
 def compute_adjacency_list(input_points,
                            input_network,
                            id_attribute,
                            impedance_attribute,
                            accumulator_attributes,
                            search_radius,
-                           max_neighbor_separation,
                            output_location,
                            adj_dbf_name):
   """
@@ -62,7 +60,6 @@ def compute_adjacency_list(input_points,
   |impedance_attribute|: distance between neighboring nodes will be based on this attribute
   |accumulator_attributes|: distance between neighboring nodes will also be recorded for these attributes
   |search_radius|: the maximum extent for centrality computation
-  |max_neighbor_separation|: the maximum extent for neighbor search
   |output_location|: adjacency list dbf will be saved here
   |adj_dbf_name|: the name of the adjacency list dbf
   """

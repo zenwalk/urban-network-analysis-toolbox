@@ -21,12 +21,11 @@ class ToolValidator:
     self.inputs["node_weight_attribute"] = params[9]
     self.inputs["impedance_attribute"] = params[10]
     self.inputs["search_radius"] = params[11]
-    self.inputs["max_neighbor_separation"] = params[12]
-    self.inputs["beta"] = params[13]
-    self.inputs["normalize_results"] = params[14]
-    self.inputs["output_location"] = params[15]
-    self.inputs["output_file_name"] = params[16]
-    self.inputs["accumulator_attributes"] = params[17]
+    self.inputs["beta"] = params[12]
+    self.inputs["normalize_results"] = params[13]
+    self.inputs["output_location"] = params[14]
+    self.inputs["output_file_name"] = params[15]
+    self.inputs["accumulator_attributes"] = params[16]
 
   def initializeParameters(self):
     """

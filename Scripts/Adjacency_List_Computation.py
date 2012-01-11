@@ -226,14 +226,13 @@ def compute_adjacency_list(input_points,
                           snap_to_position_along_network="SNAP",
                           snap_offset=SNAP_OFFSET)
 
-  # Destinations
+  # OD cost matrix destinations
   arcpy.AddMessage(ADDING_DESTINATIONS_STARTED)
-  arcpy.SelectLayerByLocation_management(in_layer=input_points_layer,
-                                         search_distance=search_radius)
+  arcpy.SelectLayerByLocation_management(in_layer=input_points_layer)
   add_locations("Destinations")
   arcpy.AddMessage(ADDING_DESTINATIONS_FINISHED)
 
-  # Point barriers
+  # OD cost matrix point barriers
   arcpy.AddMessage(ADDING_BARRIERS_STARTED)
   add_locations("Point Barriers", ("FullEdge # 0;"
                                    "BarrierType # 2;"

@@ -7,6 +7,10 @@
 # -------------------------------------------------------------------------------------
 
 import arcpy
+from Constants import ADDING_DESTINATIONS_STARTED
+from Constants import ADDING_DESTINATIONS_FINISHED
+from Constants import ADDING_BARRIERS_STARTED
+from Constants import ADDING_BARRIERS_FINISHED
 from Constants import AUXILIARY_DIR_NAME
 from Constants import BARRIER_COST
 from Constants import BARRIER_COST_COMPUTATION
@@ -23,9 +27,9 @@ from Constants import JUNCTION_FEATURE
 from Constants import NETWORK_LOCATION_FIELDS
 from Constants import OD_COST_MATRIX_LAYER_NAME
 from Constants import OD_COST_MATRIX_LINES
+from Constants import OD_MATRIX_ENTRIES
 from Constants import ORIGIN_ID_FIELD_NAME
 from Constants import PARTIAL_ADJACENCY_LIST_NAME
-from Constants import POINTS_PER_RASTER_CELL
 from Constants import POLYGONS_LAYER_NAME
 from Constants import POLYGONS_SHAPEFILE_NAME
 from Constants import RASTER_NAME
@@ -172,8 +176,9 @@ def compute_adjacency_list(input_points,
                                  output_path_shape="NO_LINES")
 
   # Determine raster cell size
+  points_per_raster_cell = OD_MATRIX_ENTRIES / input_point_count
+  raster_cell_count = max(1, input_point_count / points_per_raster_cell)
   input_points_extent = arcpy.Describe(input_points).Extent
-  raster_cell_count = max(1, input_point_count / POINTS_PER_RASTER_CELL)
   raster_cell_area = input_points_extent.width * input_points_extent.height / raster_cell_count
   raster_cell_size = int(sqrt(raster_cell_area))
 
@@ -218,16 +223,18 @@ def compute_adjacency_list(input_points,
                           snap_offset=SNAP_OFFSET)
 
   # Destinations
-  arcpy.AddMessage("Adding destinations")
+  arcpy.AddMessage(ADDING_DESTINATIONS_STARTED)
   arcpy.SelectLayerByLocation_management(in_layer=input_points_layer,
                                          search_distance=search_radius)
   add_locations("Destinations")
+  arcpy.AddMessage(ADDING_DESTINATIONS_FINISHED)
 
   # Point barriers
-  arcpy.AddMessage("Adding point barriers")
+  arcpy.AddMessage(ADDING_BARRIERS_STARTED)
   add_locations("Point Barriers", ("FullEdge # 0;"
                                    "BarrierType # 2;"
                                    "Attr_%s %s #;" % (impedance_attribute, trim(BARRIER_COST_FIELD))))
+  arcpy.AddMessage(ADDING_BARRIERS_FINISHED)
 
   # Compute adjacency list, one raster cell at a time
   progress = Progress_Bar(raster_cell_count, 1, STEP_1)

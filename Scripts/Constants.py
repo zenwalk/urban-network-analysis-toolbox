@@ -84,6 +84,11 @@ BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
 CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
 
+ADDING_DESTINATIONS_STARTED = "... [started] Adding destinations to OD cost matrix layer"
+ADDING_DESTINATIONS_FINISHED = "... [finished]"
+ADDING_BARRIERS_STARTED = "... [started] Adding barriers to OD cost matrix layer"
+ADDING_BARRIERS_FINISHED = "... [finished]"
+
 STEP_1_STARTED = "[1 started] %s" % STEP_1
 STEP_1_FAILED = "[1 failed] "
 STEP_1_FINISHED = "[1 finished]"
@@ -138,8 +143,8 @@ EDGE_FEATURE = "EdgeFeature"
 JUNCTION_FEATURE = ("JunctionFeature", "SystemJunction")
 # Network location field names
 NETWORK_LOCATION_FIELDS = ("SourceID", "SourceOID", "PosAlong", "SideOfEdge", "SnapX", "SnapY", "Distance")
-# Number of input points per raster cell
-POINTS_PER_RASTER_CELL = 600
+# Number of entries in the OD matrix during a solve
+OD_MATRIX_ENTRIES = 20 * 10**6
 # High cost assigned to buildings to stop neighbor search when a building is encountered
 BARRIER_COST_FIELD = "Barrier_Cost"
 BARRIER_COST = (maxint / 5) * 2

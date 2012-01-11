@@ -148,7 +148,7 @@ JUNCTION_FEATURE = ("JunctionFeature", "SystemJunction")
 # Network location field names
 NETWORK_LOCATION_FIELDS = ("SourceID", "SourceOID", "PosAlong", "SideOfEdge", "SnapX", "SnapY", "Distance")
 # Number of entries in the OD matrix during a solve
-OD_MATRIX_ENTRIES = 20 * 10**6
+OD_MATRIX_ENTRIES = 10 * 10**6
 # High cost assigned to buildings to stop neighbor search when a building is encountered
 BARRIER_COST_FIELD = "Barrier_Cost"
 BARRIER_COST = (maxint / 5) * 2

@@ -38,22 +38,28 @@ def construct_graph(node_ids, edges):
     graph[v].add_neighbor(u, weight)
   return graph
 
-"""
-Reach
-A
-|\
-| C--D
-|/
-B
-"""
 class TestReach(unittest.TestCase):
+  """
+  Reach
+  A
+  |\
+  | C--D
+  |/
+  B
+  """
   def setUp(self):
+    """
+    Setup
+    """
     self.graph = construct_graph(["A", "B", "C", "D"],
                                  [("A", "B", 1),
                                   ("A", "C", 1),
                                   ("B", "C", 1),
                                   ("C", "D", 1)])
   def test_Infinite_Reach(self):
+    """
+    Test reach at infinite radius
+    """
     compute_centrality(self.graph, True, False, False, False, False,
                        INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], REACH), 3)
@@ -61,6 +67,9 @@ class TestReach(unittest.TestCase):
     assert eq_tol(getattr(self.graph["C"], REACH), 3)
     assert eq_tol(getattr(self.graph["D"], REACH), 3)
   def test_Degree_Reach(self):
+    """
+    Test reach at radius 1 - the reach values are no the degrees of the nodes
+    """
     compute_centrality(self.graph, True, False, False, False, False,
                        1, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], REACH), 2)
@@ -68,23 +77,28 @@ class TestReach(unittest.TestCase):
     assert eq_tol(getattr(self.graph["C"], REACH), 3)
     assert eq_tol(getattr(self.graph["D"], REACH), 1)
 
-"""
-Gravity
-A
-|\
-| C--D
-|/
-B
-"""
 class TestGravity(unittest.TestCase):
+  """
+  Gravity
+  A
+  |\
+  | C--D
+  |/
+  B
+  """
   def setUp(self):
+    """
+    Setup
+    """
     self.graph = construct_graph(["A", "B", "C", "D"],
                                  [("A", "B", log(3)),
                                   ("A", "C", log(2)),
                                   ("B", "C", log(2)),
                                   ("C", "D", log(3))])
   def test_Gravity(self):
-    # Infinite radius, beta = 1
+    """
+    Test gravity at infinite radius and a beta value of 1
+    """
     compute_centrality(self.graph, False, True, False, False, False,
                        INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], GRAVITY), 1)
@@ -92,21 +106,27 @@ class TestGravity(unittest.TestCase):
     assert eq_tol(getattr(self.graph["C"], GRAVITY), 4.0/3)
     assert eq_tol(getattr(self.graph["D"], GRAVITY), 2.0/3)
 
-"""
-Betweenness
-A
- \
-  C--D
- /
-B
-"""
 class TestBetweenness(unittest.TestCase):
+  """
+  Betweenness
+  A
+   \
+    C--D
+   /
+  B
+  """
   def setUp(self):
+    """
+    Setup
+    """
     self.graph = construct_graph(["A", "B", "C", "D"],
                                  [("A", "C", 1),
                                   ("B", "C", 1),
                                   ("C", "D", 1)])
   def test_Betweenness(self):
+    """
+    Test betweenness at infinite radius
+    """
     compute_centrality(self.graph, False, False, True, False, False,
                        INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], BETWEENNESS), 0)
@@ -114,22 +134,28 @@ class TestBetweenness(unittest.TestCase):
     assert eq_tol(getattr(self.graph["C"], BETWEENNESS), 3)
     assert eq_tol(getattr(self.graph["D"], BETWEENNESS), 0)
 
-"""
-Closeness
-A
-|\
-| C--D
-|/
-B
-"""
 class TestCloseness(unittest.TestCase):
+  """
+  Closeness
+  A
+  |\
+  | C--D
+  |/
+  B
+  """
   def setUp(self):
+    """
+    Setup
+    """
     self.graph = construct_graph(["A", "B", "C", "D"],
                                  [("A", "B", 2),
                                   ("A", "C", 1),
                                   ("B", "C", 1),
                                   ("C", "D", 3)])
   def test_Closeness(self):
+    """
+    Test closeness at infinite radius
+    """
     compute_centrality(self.graph, False, False, False, True, False,
                        INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], CLOSENESS), 1.0/7)
@@ -137,19 +163,22 @@ class TestCloseness(unittest.TestCase):
     assert eq_tol(getattr(self.graph["C"], CLOSENESS), 1.0/5)
     assert eq_tol(getattr(self.graph["D"], CLOSENESS), 1.0/11)
 
-"""
-Straightness
-  |
- 1| A
-  | |\
- 0| | C--D
-  | |/
--1| B
-   --------
-   -1 0  1
-"""
 class TestStraightness(unittest.TestCase):
+  """
+  Straightness
+    |
+   1| A
+    | |\
+   0| | C--D
+    | |/
+  -1| B
+     --------
+     -1 0  1
+  """
   def setUp(self):
+    """
+    Setup
+    """
     self.graph = construct_graph(["A", "B", "C", "D"],
                                  [("A", "B", 2),
                                   ("A", "C", sqrt(2)),
@@ -160,6 +189,9 @@ class TestStraightness(unittest.TestCase):
     setattr(self.graph["C"], LOCATION, (0, 0))
     setattr(self.graph["D"], LOCATION, (1, 0))
   def test_Straightness(self):
+    """
+    Test straightness at infinite radius
+    """
     compute_centrality(self.graph, False, False, False, False, True,
                        INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], STRAIGHTNESS), 2+sqrt(5)/(1+sqrt(2)))

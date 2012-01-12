@@ -1,8 +1,22 @@
+# ------------------------------------------------------------------------------
+# Urban Network Analysis Toolbox for ArcGIS10
+# Credits: Michael Mekonnen, Andres Sevtsuk
+# MIT City Form Research Group
+# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported
+#   License
+# License: http://creativecommons.org/licenses/by-nc-sa/3.0/
+# ------------------------------------------------------------------------------
+
+"""
+Tool validation.
+"""
+
 import arcpy
 
 class ToolValidator:
   """
-  Validator for the tool's parameters, controls the behavior of the tool's dialog
+  Validator for the tool's parameters
+  Controls the behavior of the tool's dialog
   """
 
   def __init__(self):
@@ -41,7 +55,8 @@ class ToolValidator:
     """
     # point_location
     try:
-      buildings_type = str(arcpy.Describe(self.inputs["input_buildings"].value).shapeType)
+      buildings_type = str(
+          arcpy.Describe(self.inputs["input_buildings"].value).shapeType)
       self.inputs["point_location"].enabled = buildings_type == "Polygon"
     except:
       pass
@@ -63,11 +78,16 @@ class ToolValidator:
     # normalize_results
     metrics_to_compute = []
     norm_results = self.inputs["normalize_results"]
-    if self.inputs["compute_reach"].value: metrics_to_compute.append("Reach")
-    if self.inputs["compute_gravity"].value: metrics_to_compute.append("Gravity_Type_Index")
-    if self.inputs["compute_betweenness"].value: metrics_to_compute.append("Betweenness")
-    if self.inputs["compute_closeness"].value: metrics_to_compute.append("Closeness")
-    if self.inputs["compute_straightness"].value: metrics_to_compute.append("Straightness")
+    if self.inputs["compute_reach"].value:
+      metrics_to_compute.append("Reach")
+    if self.inputs["compute_gravity"].value:
+      metrics_to_compute.append("Gravity_Type_Index")
+    if self.inputs["compute_betweenness"].value:
+      metrics_to_compute.append("Betweenness")
+    if self.inputs["compute_closeness"].value:
+      metrics_to_compute.append("Closeness")
+    if self.inputs["compute_straightness"].value:
+      metrics_to_compute.append("Straightness")
     norm_results.filter.list = metrics_to_compute
     norm_results.enabled = bool(metrics_to_compute)
 

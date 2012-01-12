@@ -1,10 +1,11 @@
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Urban Network Analysis Toolbox for ArcGIS10
 # Credits: Michael Mekonnen, Andres Sevtsuk
 # MIT City Form Research Group
-# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported License
+# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported
+#   License
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 Constants.
@@ -57,8 +58,8 @@ INPUT_COUNT = input_number.next()
 # We convert input buildings to point feature class
 INPUT_POINTS = "INPUT_POINTS"
 # Name of input points after feature to point conversion
-POINT_FEATURE_CLASS_NAME = lambda feature_class_name, point_location: ("%s_%s_FeatureToPoint"
-                           % (feature_class_name, point_location))
+POINT_FEATURE_CLASS_NAME = lambda feature_class_name, point_location: (
+    ("%s_%s_FeatureToPoint" % (feature_class_name, point_location)))
 
 """
 Console messages
@@ -67,14 +68,18 @@ PROGRESS_NORMALIZATION = "Normalizing results"
 
 WARNING_OUTPUT_ALREADY_EXISTS = "Output with the same name already exists"
 
-WARNING_NO_EDGE_FEATURE = lambda input_network: "%s does not have edge feature" % input_network
-WARNING_NO_JUNCTION_FEATURE = lambda input_network: "%s does not have junction feature" % input_network
-WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d input points not recorded in graph"
-                                                             % (not_in_graph, in_graph + not_in_graph))
+WARNING_NO_EDGE_FEATURE = lambda input_network: ("%s does not have edge feature"
+    % input_network)
+WARNING_NO_JUNCTION_FEATURE = lambda input_network: ("%s does not have junction"
+    " feature" % input_network)
+WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d "
+    "input points not recorded in graph" % (not_in_graph, (in_graph +
+    not_in_graph)))
 WARNING_NO_NODES = "No nodes in graph"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 
-POINT_CONVERSION_STARTED = "... [started] Converting polygons to network locations"
+POINT_CONVERSION_STARTED = ("... [started] Converting polygons to network "
+    "locations")
 POINT_CONVERSION_FINISHED = "... [finished]"
 POINT_CONVERSION_DONE = "Conversion has already been done"
 
@@ -85,12 +90,15 @@ BARRIER_COST_COMPUTATION = "Barrier cost computation"
 BARRIER_COST_COMPUTATION_STARTED = "... [started] Computing barrier costs"
 BARRIER_COST_COMPUTATION_FINISHED = "... [finished]"
 
-CALCULATE_LOCATIONS_STARTED = "... [started] Calculating locations on the network"
+CALCULATE_LOCATIONS_STARTED = ("... [started] Calculating locations on the "
+    "network")
 CALCULATE_LOCATIONS_FINISHED = "... [finished]"
 
-ADDING_DESTINATIONS_STARTED = "... [started] Adding destinations to OD cost matrix layer"
+ADDING_DESTINATIONS_STARTED = ("... [started] Adding destinations to OD cost "
+    "matrix layer")
 ADDING_DESTINATIONS_FINISHED = "... [finished]"
-ADDING_BARRIERS_STARTED = "... [started] Adding barriers to OD cost matrix layer"
+ADDING_BARRIERS_STARTED = ("... [started] Adding barriers to OD cost matrix "
+    "layer")
 ADDING_BARRIERS_FINISHED = "... [finished]"
 
 STEP_1_STARTED = "[1 started] %s" % STEP_1
@@ -133,11 +141,9 @@ STRAIGHTNESS = "Straightness"
 NORM_STRAIGHTNESS = "Norm_Straightness"
 
 # Attributes that might be written to file
-FINAL_ATTRIBUTES = set([REACH, NORM_REACH,
-                        GRAVITY, NORM_GRAVITY,
-                        BETWEENNESS, NORM_BETWEENNESS,
-                        CLOSENESS, NORM_CLOSENESS,
-                        STRAIGHTNESS, NORM_STRAIGHTNESS])
+FINAL_ATTRIBUTES = set([REACH, NORM_REACH, GRAVITY, NORM_GRAVITY, BETWEENNESS,
+    NORM_BETWEENNESS, CLOSENESS, NORM_CLOSENESS, STRAIGHTNESS,
+    NORM_STRAIGHTNESS])
 
 """
 Constants for adjacency list computation
@@ -146,10 +152,12 @@ Constants for adjacency list computation
 EDGE_FEATURE = "EdgeFeature"
 JUNCTION_FEATURE = ("JunctionFeature", "SystemJunction")
 # Network location field names
-NETWORK_LOCATION_FIELDS = ("SourceID", "SourceOID", "PosAlong", "SideOfEdge", "SnapX", "SnapY", "Distance")
+NETWORK_LOCATION_FIELDS = ("SourceID", "SourceOID", "PosAlong", "SideOfEdge",
+    "SnapX", "SnapY", "Distance")
 # Number of entries in the OD matrix during a solve
 OD_MATRIX_ENTRIES = 10 * 10**6
-# High cost assigned to buildings to stop neighbor search when a building is encountered
+# High cost assigned to buildings to stop neighbor search when a building is
+#     encountered
 BARRIER_COST_FIELD = "Barrier_Cost"
 BARRIER_COST = (maxint / 5) * 2
 # Maximum extent of search on the network
@@ -174,7 +182,8 @@ OD_COST_MATRIX_LINES = "Lines"
 
 # Name of the ID column in the output dbf
 UNA_ID = "UNA_ID"
-# Name of the column that stores the original FID of polygons when converting to points
+# Name of the column that stores the original FID of polygons when converting to
+#     points
 ORIGINAL_FID = "ORIG_FID"
 
 """
@@ -183,6 +192,6 @@ Representation for an infinite radius (or infinite extent on the network)
 INFINITE_RADIUS = maxint
 
 """
-Tolerance for inequality (if abs(a - b) < |TOLERANCE|, we consider a and b equal)
+Tolerance for inequality (if abs(a - b) <= |TOLERANCE|, consider a and b equal)
 """
 TOLERANCE = 0.000001

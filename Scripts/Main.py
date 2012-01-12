@@ -1,18 +1,19 @@
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Urban Network Analysis Toolbox for ArcGIS10
 # Credits: Michael Mekonnen, Andres Sevtsuk
 # MIT City Form Research Group
-# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported License
+# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported
+#   License
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 Script for taking in the inputs to the toolbox and returning its outputs.
 """
 
 from Adjacency_List_Computation import compute_adjacency_list
-import arcpy
 import arcgisscripting
+import arcpy
 from Centrality_Computation import compute_centrality
 from Constants import ACCUMULATOR_ATTRIBUTES
 from Constants import ADJACENCY_LIST_COMPUTED
@@ -110,7 +111,8 @@ def index():
 input_number = index()
 inputs = {}
 inputs[INPUT_BUILDINGS] = argv[input_number.next()]
-inputs[POINT_LOCATION] = "INSIDE" if argv[input_number.next()] == "true" else "CENTROID"
+inputs[POINT_LOCATION] = ("INSIDE" if argv[input_number.next()] == "true" else
+    "CENTROID")
 inputs[INPUT_NETWORK] = argv[input_number.next()]
 inputs[COMPUTE_REACH] = argv[input_number.next()] == "true"
 inputs[COMPUTE_GRAVITY] = argv[input_number.next()] == "true"
@@ -124,9 +126,8 @@ try: inputs[SEARCH_RADIUS] = float(argv[input_number.next()])
 except: inputs[SEARCH_RADIUS] = INFINITE_RADIUS
 try: inputs[BETA] = float(argv[input_number.next()])
 except: raise Invalid_Input_Exception("Beta")
-inputs[NORMALIZE_RESULTS] = [measure
-                             for measure in argv[input_number.next()].split(";")
-                             if measure != "#"]
+inputs[NORMALIZE_RESULTS] = [measure for measure in
+    argv[input_number.next()].split(";") if measure != "#"]
 inputs[OUTPUT_LOCATION] = argv[input_number.next()]
 inputs[OUTPUT_FILE_NAME] = argv[input_number.next()]
 inputs[ACCUMULATOR_ATTRIBUTES] = argv[input_number.next()]
@@ -138,11 +139,12 @@ if buildings_description.shapeType == "Point":
   inputs[INPUT_POINTS] = inputs[INPUT_BUILDINGS]
 elif buildings_description.shapeType == "Polygon":
   # Input buildings need to be converted to point feature class
-  point_feature_class_name = POINT_FEATURE_CLASS_NAME(basename(inputs[INPUT_BUILDINGS]),
-                                                      inputs[POINT_LOCATION])
+  point_feature_class_name = POINT_FEATURE_CLASS_NAME(
+      basename(inputs[INPUT_BUILDINGS]), inputs[POINT_LOCATION])
   inputs[INPUT_POINTS] = "%s.shp" % join(inputs[OUTPUT_LOCATION],
-                                         point_feature_class_name)
-  # If FID is used as ID attribute, we need to change it since a new shapefile will be in use
+      point_feature_class_name)
+  # If FID is used as ID attribute, we need to change it since a new shapefile
+  #     will be in use
   if inputs[ID_ATTRIBUTE] == "FID":
     inputs[ID_ATTRIBUTE] = ORIGINAL_FID
 else:
@@ -158,13 +160,10 @@ if arcpy.Exists(output_dbf) or arcpy.Exists(output_layer):
   arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
   success = False
 # Adjacency List table
-adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" %
-                (ADJACENCY_LIST_NAME,
-                 basename(inputs[INPUT_POINTS]),
-                 basename(inputs[INPUT_NETWORK]),
-                 inputs[ID_ATTRIBUTE],
-                 inputs[IMPEDANCE_ATTRIBUTE],
-                 inputs[ACCUMULATOR_ATTRIBUTES]))
+adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
+    basename(inputs[INPUT_POINTS]), basename(inputs[INPUT_NETWORK]),
+    inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
+    inputs[ACCUMULATOR_ATTRIBUTES]))
 adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
 def clean_up():
@@ -181,15 +180,9 @@ def clean_up():
   raster = join(auxiliary_dir, RASTER_NAME)
   polygons_layer = join(auxiliary_dir, POLYGONS_LAYER_NAME)
   input_points_layer = join(auxiliary_dir, INPUT_POINTS_LAYER_NAME)
-  for path in [input_points_layer,
-               polygons_layer,
-               raster,
-               polygons,
-               partial_adj_dbf,
-               temp_adj_dbf,
-               od_cost_matrix_lines,
-               od_cost_matrix_layer,
-               auxiliary_dir]:
+  for path in [input_points_layer, polygons_layer, raster, polygons,
+      partial_adj_dbf, temp_adj_dbf, od_cost_matrix_lines, od_cost_matrix_layer,
+      auxiliary_dir]:
     delete(path)
 
 try:
@@ -203,23 +196,18 @@ try:
     # If necessary, convert input buildings to point feature class
     if buildings_description.shapeType == "Polygon":
       arcpy.AddMessage(POINT_CONVERSION_STARTED)
-      to_point_feature_class(inputs[INPUT_BUILDINGS],
-                             inputs[INPUT_POINTS],
-                             inputs[POINT_LOCATION])
+      to_point_feature_class(inputs[INPUT_BUILDINGS], inputs[INPUT_POINTS],
+          inputs[POINT_LOCATION])
       arcpy.AddMessage(POINT_CONVERSION_FINISHED)
     if arcpy.Exists(adj_dbf):
       arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
       arcpy.AddMessage(STEP_1_FINISHED)
     else:
       try:
-        compute_adjacency_list(inputs[INPUT_POINTS],
-                               inputs[INPUT_NETWORK],
-                               inputs[ID_ATTRIBUTE],
-                               inputs[IMPEDANCE_ATTRIBUTE],
-                               inputs[ACCUMULATOR_ATTRIBUTES],
-                               inputs[SEARCH_RADIUS],
-                               inputs[OUTPUT_LOCATION],
-                               adj_dbf_name)
+        compute_adjacency_list(inputs[INPUT_POINTS], inputs[INPUT_NETWORK],
+            inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
+            inputs[ACCUMULATOR_ATTRIBUTES], inputs[SEARCH_RADIUS],
+            inputs[OUTPUT_LOCATION], adj_dbf_name)
         arcpy.AddMessage(STEP_1_FINISHED)
       except:
         arcpy.AddWarning(arcpy.GetMessages(2))
@@ -232,13 +220,14 @@ try:
     try:
       distance_field = trim("Total_%s" % inputs[IMPEDANCE_ATTRIBUTE])
       accumulator_fields = set([trim("Total_%s" % accumulator_attribute)
-                                for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES].split(";")
-                                if accumulator_attribute != "#"])
+          for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES].split(";")
+          if accumulator_attribute != "#"])
 
-      # Create graph representation: a dictionary mapping node id's to Node objects
+      # Graph representation: dictionary mapping node id's to Node objects
       nodes = {}
 
-      directed_edge_count = int(arcpy.GetCount_management(adj_dbf).getOutput(0)) # The number of rows in |adj_dbf|
+      # The number of rows in |adj_dbf|
+      directed_edge_count = int(arcpy.GetCount_management(adj_dbf).getOutput(0))
       graph_progress = Progress_Bar(directed_edge_count, 1, STEP_2)
       rows = arcpy.UpdateCursor(adj_dbf)
       for row in rows:
@@ -282,7 +271,8 @@ try:
       # Keep track of number nodes in |input_points| not present in the graph
       point_not_in_graph_count = 0
 
-      input_point_count = int(arcpy.GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
+      input_point_count = int(
+          arcpy.GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
       node_attribute_progress = Progress_Bar(input_point_count, 1, STEP_3)
       rows = arcpy.UpdateCursor(inputs[INPUT_POINTS])
       for row in rows:
@@ -293,7 +283,8 @@ try:
           continue
 
         if get_weights:
-          setattr(nodes[id], WEIGHT, row.getValue(trim(inputs[NODE_WEIGHT_ATTRIBUTE])))
+          setattr(nodes[id], WEIGHT,
+              row.getValue(trim(inputs[NODE_WEIGHT_ATTRIBUTE])))
 
         if get_locations:
           snap_x = row.getValue(trim("SnapX"))
@@ -303,7 +294,8 @@ try:
         node_attribute_progress.step()
 
       if point_not_in_graph_count:
-        arcpy.AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N, point_not_in_graph_count))
+        arcpy.AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N,
+            point_not_in_graph_count))
 
       arcpy.AddMessage(STEP_3_FINISHED)
     except:
@@ -316,16 +308,10 @@ try:
     arcpy.AddMessage(STEP_4_STARTED)
     try:
       # Compute measures
-      compute_centrality(nodes,
-                         inputs[COMPUTE_REACH],
-                         inputs[COMPUTE_GRAVITY],
-                         inputs[COMPUTE_BETWEENNESS],
-                         inputs[COMPUTE_CLOSENESS],
-                         inputs[COMPUTE_STRAIGHTNESS],
-                         inputs[SEARCH_RADIUS],
-                         inputs[BETA],
-                         inputs[NORMALIZE_RESULTS],
-                         accumulator_fields)
+      compute_centrality(nodes, inputs[COMPUTE_REACH], inputs[COMPUTE_GRAVITY],
+          inputs[COMPUTE_BETWEENNESS], inputs[COMPUTE_CLOSENESS],
+          inputs[COMPUTE_STRAIGHTNESS], inputs[SEARCH_RADIUS], inputs[BETA],
+          inputs[NORMALIZE_RESULTS], accumulator_fields)
       arcpy.AddMessage(STEP_4_FINISHED)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
@@ -337,22 +323,18 @@ try:
     arcpy.AddMessage(STEP_5_STARTED)
     try:
       arcpy.CreateTable_management(out_path=inputs[OUTPUT_LOCATION],
-                                   out_name=output_dbf_name)
+          out_name=output_dbf_name)
 
-      arcpy.AddField_management(in_table=output_dbf,
-                                field_name=UNA_ID,
-                                field_type="TEXT",
-                                field_is_nullable="NON_NULLABLE")
+      arcpy.AddField_management(in_table=output_dbf, field_name=UNA_ID,
+          field_type="TEXT", field_is_nullable="NON_NULLABLE")
 
       test_node = nodes.values()[0]
-      measures = set([measure for measure in dir(test_node) \
-                      if measure in FINAL_ATTRIBUTES or is_accumulator_field(measure)])
+      measures = set([measure for measure in dir(test_node) if (measure in
+          FINAL_ATTRIBUTES or is_accumulator_field(measure))])
 
       for measure in measures:
-        arcpy.AddField_management(in_table=output_dbf,
-                                  field_name=trim(measure),
-                                  field_type="DOUBLE",
-                                  field_is_nullable="NON_NULLABLE")
+        arcpy.AddField_management(in_table=output_dbf, field_name=trim(measure),
+            field_type="DOUBLE", field_is_nullable="NON_NULLABLE")
 
       write_progress = Progress_Bar(N, 1, STEP_5)
       rows = arcpy.InsertCursor(output_dbf)
@@ -375,15 +357,15 @@ try:
     arcpy.AddMessage(STEP_6_STARTED)
     try:
       arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_BUILDINGS],
-                                        out_layer=output_layer)
+          out_layer=output_layer)
       # Join |output_dbf| with |output_layer|
-      if buildings_description.shapeType == "Polygon" and inputs[ID_ATTRIBUTE] == ORIGINAL_FID:
+      if (buildings_description.shapeType == "Polygon" and 
+          inputs[ID_ATTRIBUTE] == ORIGINAL_FID):
         in_field = "FID"
       else:
         in_field = inputs[ID_ATTRIBUTE]
       join_field = UNA_ID
-      arcpy.AddJoin_management(output_layer, in_field,
-                               output_dbf, join_field)
+      arcpy.AddJoin_management(output_layer, in_field, output_dbf, join_field)
 
       # Save
       layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer)
@@ -397,7 +379,8 @@ try:
     if success:
       try:
         current_map_document = arcpy.mapping.MapDocument("CURRENT")
-        data_frame = arcpy.mapping.ListDataFrames(current_map_document, "Layers")[0]
+        data_frame = arcpy.mapping.ListDataFrames(current_map_document,
+            "Layers")[0]
         add_layer = arcpy.mapping.Layer(layer)
         arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
         arcpy.AddMessage(STEP_6_FINISHED)

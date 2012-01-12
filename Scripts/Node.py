@@ -1,10 +1,11 @@
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Urban Network Analysis Toolbox for ArcGIS10
 # Credits: Michael Mekonnen, Andres Sevtsuk
 # MIT City Form Research Group
-# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported License
+# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported
+#   License
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 Script for representation of a weighted, undirected graph.
@@ -32,6 +33,5 @@ class Node:
     |edge_weight|: weight of the edge connecting the two nodes
     |accumulation_weights|: weight of the edge based on other metrics
     """
-    getattr(self, NEIGHBORS).add((neighbor_id,
-                                  edge_weight,
-                                  tuple(accumulation_weights.items())))
+    getattr(self, NEIGHBORS).add((neighbor_id, edge_weight,
+        tuple(accumulation_weights.items())))

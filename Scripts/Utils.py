@@ -1,10 +1,11 @@
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Urban Network Analysis Toolbox for ArcGIS10
 # Credits: Michael Mekonnen, Andres Sevtsuk
 # MIT City Form Research Group
-# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported License
+# Usage: Creative Commons Attribution - NonCommercial - ShareAlike 3.0 Unported
+#   License
 # License: http://creativecommons.org/licenses/by-nc-sa/3.0/
-# -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 Utility methods.
@@ -89,8 +90,8 @@ def to_point_feature_class(feature_class, point_feature_class, point_location):
     arcpy.AddMessage(POINT_CONVERSION_DONE)
   else:
     arcpy.FeatureToPoint_management(in_features=feature_class,
-                                    out_feature_class=point_feature_class,
-                                    point_location=point_location)
+        out_feature_class=point_feature_class,
+        point_location=point_location)
 
 def eq_tol(a, b):
   """

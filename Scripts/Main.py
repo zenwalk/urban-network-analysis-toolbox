@@ -77,6 +77,8 @@ from Constants import STEP_6_FAILED
 from Constants import STEP_6_FINISHED
 from Constants import STEP_6_STARTED
 from Constants import SUCCESS
+from Constants import SYMBOLOGY_FOLDER_NAME
+from Constants import symbology_layer_name
 from Constants import UNA_ID
 from Constants import WARNING_FAIL_TO_DISPLAY
 from Constants import WARNING_NO_NODES
@@ -84,8 +86,11 @@ from Constants import WARNING_OUTPUT_ALREADY_EXISTS
 from Constants import WARNING_POINTS_NOT_IN_GRAPH
 from Constants import WEIGHT
 from Node import Node
+from os.path import abspath
 from os.path import join
+from os.path import pardir
 from sys import argv
+from sys import path
 from Utils import basename
 from Utils import delete
 from Utils import Invalid_Input_Exception
@@ -154,9 +159,17 @@ else:
 # Output files
 output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]
 output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
+for input_number, metric in ((COMPUTE_REACH, "Reach"), (COMPUTE_GRAVITY,
+    "Gravity"), (COMPUTE_BETWEENNESS, "Betweenness"), (COMPUTE_CLOSENESS,
+    "Closeness"), (COMPUTE_STRAIGHTNESS, "Straightness")):
+  if inputs[input_number]:
+      first_metric = metric
+      break
+temp_output_layer = symbology_layer_name(buildings_description.shapeType,
+    first_metric)
 output_layer = layer_name(inputs[OUTPUT_FILE_NAME])
 # If output has already been created, don't carry on
-if arcpy.Exists(output_dbf) or arcpy.Exists(output_layer):
+if arcpy.Exists(output_dbf):
   arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
   success = False
 # Adjacency List table
@@ -357,19 +370,30 @@ try:
     arcpy.AddMessage(STEP_6_STARTED)
     try:
       arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_BUILDINGS],
-          out_layer=output_layer)
-      # Join |output_dbf| with |output_layer|
+          out_layer=temp_output_layer)
+      # Join |output_dbf| with |temp_output_layer|
       if (buildings_description.shapeType == "Polygon" and 
           inputs[ID_ATTRIBUTE] == ORIGINAL_FID):
         in_field = "FID"
       else:
         in_field = inputs[ID_ATTRIBUTE]
       join_field = UNA_ID
-      arcpy.AddJoin_management(output_layer, in_field, output_dbf, join_field)
-
+      arcpy.AddJoin_management(temp_output_layer, in_field, output_dbf,
+          join_field)
+      # Apply symbology
+      script_dir = path[0]
+      parent_dir = abspath(join(script_dir, pardir))
+      symbology_dir = join(parent_dir, SYMBOLOGY_FOLDER_NAME)
+      symbology_layer = join(symbology_dir, temp_output_layer)
+      arcpy.ApplySymbologyFromLayer_management(in_layer=temp_output_layer,
+          in_symbology_layer=symbology_layer)
       # Save
+      temp_layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], temp_output_layer)
+      arcpy.SaveToLayerFile_management(temp_output_layer, temp_layer,
+          "ABSOLUTE")
+      # Rename
       layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer)
-      arcpy.SaveToLayerFile_management(output_layer, layer, "ABSOLUTE")
+      arcpy.Rename_management(in_data=temp_layer, out_data=layer)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
       arcpy.AddMessage(STEP_6_FAILED)

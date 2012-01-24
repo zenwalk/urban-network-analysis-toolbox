@@ -95,6 +95,16 @@ class ToolValidator:
     """
     Called after internal validation
     """
+    # centrality metrics
+    reach = self.inputs["compute_reach"]
+    gravity = self.inputs["compute_gravity"]
+    betweenness = self.inputs["compute_betweenness"]
+    closeness = self.inputs["compute_closeness"]
+    straightness = self.inputs["compute_straightness"]
+    if not any(metric.value for metric in (reach, gravity, betweenness,
+        closeness, straightness)):
+      reach.setErrorMessage("Please select at leaste one metric")
+
     # id_attribute
     id_attribute = self.inputs["id_attribute"]
     input_buildings = self.inputs["input_buildings"]

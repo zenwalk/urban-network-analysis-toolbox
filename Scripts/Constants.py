@@ -169,7 +169,10 @@ ORIGIN_ID_FIELD_NAME = "OriginID"
 DESTINATION_ID_FIELD_NAME = "DestinationID"
 
 # File names
+symbology_layer_name= lambda shape_type, first_metric: (
+    "%s_%s_Symbology_Layer.lyr" % (shape_type, first_metric))
 layer_name = lambda base: "%s_Layer" % base
+SYMBOLOGY_FOLDER_NAME = "Symbology_Layers"
 ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
 OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")

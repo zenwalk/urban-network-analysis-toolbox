@@ -27,6 +27,7 @@ from Constants import COMPUTE_REACH
 from Constants import COMPUTE_STRAIGHTNESS
 from Constants import DESTINATION_ID_FIELD_NAME
 from Constants import FAILURE
+from Constants import feature_class_name
 from Constants import FINAL_ATTRIBUTES
 from Constants import ID_ATTRIBUTE
 from Constants import IMPEDANCE_ATTRIBUTE
@@ -38,6 +39,7 @@ from Constants import INPUT_POINTS
 from Constants import INPUT_POINTS_LAYER_NAME
 from Constants import layer_name
 from Constants import LOCATION
+from Constants import METRICS
 from Constants import NODE_WEIGHT_ATTRIBUTE
 from Constants import NORMALIZE_RESULTS
 from Constants import OD_COST_MATRIX_LAYER_NAME
@@ -77,20 +79,16 @@ from Constants import STEP_6_FAILED
 from Constants import STEP_6_FINISHED
 from Constants import STEP_6_STARTED
 from Constants import SUCCESS
-from Constants import SYMBOLOGY_FOLDER_NAME
+from Constants import SYMBOLOGY_DIR
 from Constants import symbology_layer_name
-from Constants import UNA_ID
 from Constants import WARNING_FAIL_TO_DISPLAY
 from Constants import WARNING_NO_NODES
 from Constants import WARNING_OUTPUT_ALREADY_EXISTS
 from Constants import WARNING_POINTS_NOT_IN_GRAPH
 from Constants import WEIGHT
 from Node import Node
-from os.path import abspath
 from os.path import join
-from os.path import pardir
 from sys import argv
-from sys import path
 from Utils import basename
 from Utils import delete
 from Utils import Invalid_Input_Exception
@@ -156,20 +154,25 @@ else:
   # Input buildings need to be either points or polygons
   raise Invalid_Input_Exception("Input Buildings")
 
-# Output files
-output_dbf_name = "%s.dbf" % inputs[OUTPUT_FILE_NAME]
-output_dbf = join(inputs[OUTPUT_LOCATION], output_dbf_name)
-for input_number, metric in ((COMPUTE_REACH, "Reach"), (COMPUTE_GRAVITY,
-    "Gravity"), (COMPUTE_BETWEENNESS, "Betweenness"), (COMPUTE_CLOSENESS,
-    "Closeness"), (COMPUTE_STRAIGHTNESS, "Straightness")):
-  if inputs[input_number]:
-      first_metric = metric
-      break
-temp_output_layer = symbology_layer_name(buildings_description.shapeType,
+# Output layer
+output_feature_class_name = feature_class_name(inputs[OUTPUT_FILE_NAME])
+output_feature_class = "%s.shp" % join(inputs[OUTPUT_LOCATION],
+    output_feature_class_name)
+arcpy.CreateFeatureclass_management(out_path=inputs[OUTPUT_LOCATION],
+    out_name=output_feature_class_name)
+arcpy.CopyFeatures_management(in_features=inputs[INPUT_BUILDINGS],
+    out_feature_class=output_feature_class)
+output_layer_name = layer_name(inputs[OUTPUT_FILE_NAME])
+output_layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer_name)
+for i in range(len(METRICS)):
+    if inputs[COMPUTE_REACH + i]:
+        first_metric = METRICS[i]
+        break
+symbology_layer_name = symbology_layer_name(buildings_description.shapeType,
     first_metric)
-output_layer = layer_name(inputs[OUTPUT_FILE_NAME])
+symbology_layer = join(SYMBOLOGY_DIR, symbology_layer_name)
 # If output has already been created, don't carry on
-if arcpy.Exists(output_dbf):
+if arcpy.Exists(output_layer):
   arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
   success = False
 # Adjacency List table
@@ -193,10 +196,10 @@ def clean_up():
   raster = join(auxiliary_dir, RASTER_NAME)
   polygons_layer = join(auxiliary_dir, POLYGONS_LAYER_NAME)
   input_points_layer = join(auxiliary_dir, INPUT_POINTS_LAYER_NAME)
-  for path in [input_points_layer, polygons_layer, raster, polygons,
+  for delete_path in [input_points_layer, polygons_layer, raster, polygons,
       partial_adj_dbf, temp_adj_dbf, od_cost_matrix_lines, od_cost_matrix_layer,
       auxiliary_dir]:
-    delete(path)
+    delete(delete_path)
 
 try:
   """
@@ -335,30 +338,36 @@ try:
   if success:
     arcpy.AddMessage(STEP_5_STARTED)
     try:
-      arcpy.CreateTable_management(out_path=inputs[OUTPUT_LOCATION],
-          out_name=output_dbf_name)
-
-      arcpy.AddField_management(in_table=output_dbf, field_name=UNA_ID,
-          field_type="TEXT", field_is_nullable="NON_NULLABLE")
-
+      # Make output layer
+      arcpy.MakeFeatureLayer_management(in_features=output_feature_class,
+          out_layer=output_layer_name)
+      # Save output layer
+      arcpy.SaveToLayerFile_management(output_layer_name, output_layer,
+          "ABSOLUTE")
+      # Use a test node to figure out which metrics were computed
       test_node = nodes.values()[0]
       measures = set([measure for measure in dir(test_node) if (measure in
           FINAL_ATTRIBUTES or is_accumulator_field(measure))])
-
+      # Add a field in the output layer for each computed meatric
       for measure in measures:
-        arcpy.AddField_management(in_table=output_dbf, field_name=trim(measure),
-            field_type="DOUBLE", field_is_nullable="NON_NULLABLE")
-
+        arcpy.AddField_management(in_table=output_layer,
+            field_name=trim(measure), field_type="DOUBLE",
+            field_is_nullable="NON_NULLABLE")
+      # Figure out the id field to use based on the type of the input buildings
+      if (buildings_description.shapeType == "Polygon" and 
+          inputs[ID_ATTRIBUTE] == ORIGINAL_FID):
+        id_field = "FID"
+      else:
+        id_field = inputs[ID_ATTRIBUTE]
+      # Fill the layer with the metric values
       write_progress = Progress_Bar(N, 1, STEP_5)
-      rows = arcpy.InsertCursor(output_dbf)
-      for id in nodes:
-        row = rows.newRow()
-        row.setValue(UNA_ID, str(id))
-        for measure in measures:
-          row.setValue(trim(measure), getattr(nodes[id], measure))
-        rows.insertRow(row)
-        write_progress.step()
-
+      layer_rows = arcpy.UpdateCursor(output_layer)
+      for row in layer_rows:
+          id = row.getValue(id_field)
+          for measure in measures:
+            row.setValue(trim(measure), getattr(nodes[id], measure))
+          layer_rows.updateRow(row)
+          write_progress.step()
       arcpy.AddMessage(STEP_5_FINISHED)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
@@ -369,31 +378,9 @@ try:
   if success:
     arcpy.AddMessage(STEP_6_STARTED)
     try:
-      arcpy.MakeFeatureLayer_management(in_features=inputs[INPUT_BUILDINGS],
-          out_layer=temp_output_layer)
-      # Join |output_dbf| with |temp_output_layer|
-      if (buildings_description.shapeType == "Polygon" and 
-          inputs[ID_ATTRIBUTE] == ORIGINAL_FID):
-        in_field = "FID"
-      else:
-        in_field = inputs[ID_ATTRIBUTE]
-      join_field = UNA_ID
-      arcpy.AddJoin_management(temp_output_layer, in_field, output_dbf,
-          join_field)
       # Apply symbology
-      script_dir = path[0]
-      parent_dir = abspath(join(script_dir, pardir))
-      symbology_dir = join(parent_dir, SYMBOLOGY_FOLDER_NAME)
-      symbology_layer = join(symbology_dir, temp_output_layer)
-      arcpy.ApplySymbologyFromLayer_management(in_layer=temp_output_layer,
+      arcpy.ApplySymbologyFromLayer_management(in_layer=output_layer,
           in_symbology_layer=symbology_layer)
-      # Save
-      temp_layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], temp_output_layer)
-      arcpy.SaveToLayerFile_management(temp_output_layer, temp_layer,
-          "ABSOLUTE")
-      # Rename
-      layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer)
-      arcpy.Rename_management(in_data=temp_layer, out_data=layer)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
       arcpy.AddMessage(STEP_6_FAILED)
@@ -405,7 +392,7 @@ try:
         current_map_document = arcpy.mapping.MapDocument("CURRENT")
         data_frame = arcpy.mapping.ListDataFrames(current_map_document,
             "Layers")[0]
-        add_layer = arcpy.mapping.Layer(layer)
+        add_layer = arcpy.mapping.Layer(output_layer)
         arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
         arcpy.AddMessage(STEP_6_FINISHED)
       except:

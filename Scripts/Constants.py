@@ -11,7 +11,11 @@
 Constants.
 """
 
+from os.path import abspath
+from os.path import join
+from os.path import pardir
 from sys import maxint
+from sys import path
 
 """
 The six steps of the tool
@@ -131,8 +135,8 @@ LOCATION = "Location"
 WEIGHT = "Weight"
 REACH = "Reach"
 NORM_REACH = "Norm_Reach"
-GRAVITY = "Gravity_Type_Index"
-NORM_GRAVITY = "Norm_Gravity_Type_Index"
+GRAVITY = "Gravity"
+NORM_GRAVITY = "Norm_Gravity"
 BETWEENNESS = "Betweenness"
 NORM_BETWEENNESS = "Norm_Betweenness"
 CLOSENESS = "Closeness"
@@ -141,9 +145,10 @@ STRAIGHTNESS = "Straightness"
 NORM_STRAIGHTNESS = "Norm_Straightness"
 
 # Attributes that might be written to file
-FINAL_ATTRIBUTES = set([REACH, NORM_REACH, GRAVITY, NORM_GRAVITY, BETWEENNESS,
-    NORM_BETWEENNESS, CLOSENESS, NORM_CLOSENESS, STRAIGHTNESS,
-    NORM_STRAIGHTNESS])
+METRICS = (REACH, GRAVITY, BETWEENNESS, CLOSENESS, STRAIGHTNESS)
+NORM_METRICS = (NORM_REACH, NORM_GRAVITY, NORM_BETWEENNESS, NORM_CLOSENESS,
+    NORM_STRAIGHTNESS)
+FINAL_ATTRIBUTES = METRICS + NORM_METRICS
 
 """
 Constants for adjacency list computation
@@ -169,10 +174,14 @@ ORIGIN_ID_FIELD_NAME = "OriginID"
 DESTINATION_ID_FIELD_NAME = "DestinationID"
 
 # File names
+feature_class_name = lambda base: "%s_Featureclass" % base
+layer_name = lambda base: "%s_Layer" % base
 symbology_layer_name= lambda shape_type, first_metric: (
     "%s_%s_Symbology_Layer.lyr" % (shape_type, first_metric))
-layer_name = lambda base: "%s_Layer" % base
-SYMBOLOGY_FOLDER_NAME = "Symbology_Layers"
+SYMBOLOGY_DIR_NAME = "Symbology_Layers"
+SCRIPT_DIR = path[0] # Path for the "Scripts" directory
+SCRIPT_PARENT_DIR = abspath(join(SCRIPT_DIR, pardir))
+SYMBOLOGY_DIR = join(SCRIPT_PARENT_DIR, SYMBOLOGY_DIR_NAME)
 ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
 OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")
@@ -183,8 +192,6 @@ RASTER_NAME = "Raster"
 INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
 OD_COST_MATRIX_LINES = "Lines"
 
-# Name of the ID column in the output dbf
-UNA_ID = "UNA_ID"
 # Name of the column that stores the original FID of polygons when converting to
 #     points
 ORIGINAL_FID = "ORIG_FID"

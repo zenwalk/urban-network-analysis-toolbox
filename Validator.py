@@ -81,7 +81,7 @@ class ToolValidator:
     if self.inputs["compute_reach"].value:
       metrics_to_compute.append("Reach")
     if self.inputs["compute_gravity"].value:
-      metrics_to_compute.append("Gravity_Type_Index")
+      metrics_to_compute.append("Gravity")
     if self.inputs["compute_betweenness"].value:
       metrics_to_compute.append("Betweenness")
     if self.inputs["compute_closeness"].value:

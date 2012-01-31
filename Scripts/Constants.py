@@ -68,6 +68,10 @@ POINT_FEATURE_CLASS_NAME = lambda feature_class_name, point_location: (
 """
 Console messages
 """
+INPUT_BUILDINGS_COPY_STARTED = "[started] Copying input buildings"
+INPUT_BUILDINGS_COPY_FINISHED = "[finished]"
+INPUT_BUILDINGS_COPY_FAILED = "[failed]"
+
 PROGRESS_NORMALIZATION = "Normalizing results"
 
 WARNING_OUTPUT_ALREADY_EXISTS = "Output with the same name already exists"

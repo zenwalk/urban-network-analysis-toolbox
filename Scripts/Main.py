@@ -33,6 +33,9 @@ from Constants import ID_ATTRIBUTE
 from Constants import IMPEDANCE_ATTRIBUTE
 from Constants import INFINITE_RADIUS
 from Constants import INPUT_BUILDINGS
+from Constants import INPUT_BUILDINGS_COPY_FAILED
+from Constants import INPUT_BUILDINGS_COPY_FINISHED
+from Constants import INPUT_BUILDINGS_COPY_STARTED
 from Constants import INPUT_COUNT
 from Constants import INPUT_NETWORK
 from Constants import INPUT_POINTS
@@ -135,15 +138,46 @@ inputs[OUTPUT_LOCATION] = argv[input_number.next()]
 inputs[OUTPUT_FILE_NAME] = argv[input_number.next()]
 inputs[ACCUMULATOR_ATTRIBUTES] = argv[input_number.next()]
 
-# We will convert input buildings to point feature class
-buildings_description = arcpy.Describe(inputs[INPUT_BUILDINGS])
+# Adjacency List table name
+adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
+    basename(inputs[INPUT_BUILDINGS]), basename(inputs[INPUT_NETWORK]),
+    inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
+    inputs[ACCUMULATOR_ATTRIBUTES]))
+adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
+
+# Output file names
+output_feature_class_name = feature_class_name(inputs[OUTPUT_FILE_NAME])
+output_feature_class = "%s.shp" % join(inputs[OUTPUT_LOCATION],
+    output_feature_class_name)
+# Create a feature class that is a copy of the input buildings
+try:
+  arcpy.AddMessage(INPUT_BUILDINGS_COPY_STARTED)
+  arcpy.CreateFeatureclass_management(out_path=inputs[OUTPUT_LOCATION],
+      out_name=output_feature_class_name)
+  arcpy.CopyFeatures_management(in_features=inputs[INPUT_BUILDINGS],
+      out_feature_class=output_feature_class)
+  arcpy.AddMessage(INPUT_BUILDINGS_COPY_FINISHED)
+except:
+  arcpy.AddWarning(arcpy.GetMessages(2))
+  arcpy.AddMessage(INPUT_BUILDINGS_COPY_FAILED)
+  success = False
+output_layer_name = layer_name(inputs[OUTPUT_FILE_NAME])
+output_layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer_name)
+
+# If output has already been created, don't carry on
+if arcpy.Exists(output_layer):
+  arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
+  success = False
+
+# We will convert polygon input buildings to point feature class
+buildings_description = arcpy.Describe(output_feature_class)
 if buildings_description.shapeType == "Point":
   # Input buildings are already a point shape file
-  inputs[INPUT_POINTS] = inputs[INPUT_BUILDINGS]
+  inputs[INPUT_POINTS] = output_feature_class
 elif buildings_description.shapeType == "Polygon":
   # Input buildings need to be converted to point feature class
   point_feature_class_name = POINT_FEATURE_CLASS_NAME(
-      basename(inputs[INPUT_BUILDINGS]), inputs[POINT_LOCATION])
+      basename(output_feature_class), inputs[POINT_LOCATION])
   inputs[INPUT_POINTS] = "%s.shp" % join(inputs[OUTPUT_LOCATION],
       point_feature_class_name)
   # If FID is used as ID attribute, we need to change it since a new shapefile
@@ -154,33 +188,14 @@ else:
   # Input buildings need to be either points or polygons
   raise Invalid_Input_Exception("Input Buildings")
 
-# Output layer
-output_feature_class_name = feature_class_name(inputs[OUTPUT_FILE_NAME])
-output_feature_class = "%s.shp" % join(inputs[OUTPUT_LOCATION],
-    output_feature_class_name)
-arcpy.CreateFeatureclass_management(out_path=inputs[OUTPUT_LOCATION],
-    out_name=output_feature_class_name)
-arcpy.CopyFeatures_management(in_features=inputs[INPUT_BUILDINGS],
-    out_feature_class=output_feature_class)
-output_layer_name = layer_name(inputs[OUTPUT_FILE_NAME])
-output_layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer_name)
-for i in range(len(METRICS)):
-    if inputs[COMPUTE_REACH + i]:
-        first_metric = METRICS[i]
+# Appropriate symbology layer name
+for metric_index in range(len(METRICS)):
+    if inputs[COMPUTE_REACH + metric_index]:
+        first_metric = METRICS[metric_index]
         break
 symbology_layer_name = symbology_layer_name(buildings_description.shapeType,
     first_metric)
 symbology_layer = join(SYMBOLOGY_DIR, symbology_layer_name)
-# If output has already been created, don't carry on
-if arcpy.Exists(output_layer):
-  arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
-  success = False
-# Adjacency List table
-adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
-    basename(inputs[INPUT_POINTS]), basename(inputs[INPUT_NETWORK]),
-    inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
-    inputs[ACCUMULATOR_ATTRIBUTES]))
-adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
 def clean_up():
   """
@@ -212,7 +227,7 @@ try:
     # If necessary, convert input buildings to point feature class
     if buildings_description.shapeType == "Polygon":
       arcpy.AddMessage(POINT_CONVERSION_STARTED)
-      to_point_feature_class(inputs[INPUT_BUILDINGS], inputs[INPUT_POINTS],
+      to_point_feature_class(output_feature_class, inputs[INPUT_POINTS],
           inputs[POINT_LOCATION])
       arcpy.AddMessage(POINT_CONVERSION_FINISHED)
     if arcpy.Exists(adj_dbf):
@@ -354,7 +369,7 @@ try:
             field_name=trim(measure), field_type="DOUBLE",
             field_is_nullable="NON_NULLABLE")
       # Figure out the id field to use based on the type of the input buildings
-      if (buildings_description.shapeType == "Polygon" and 
+      if (buildings_description.shapeType == "Polygon" and
           inputs[ID_ATTRIBUTE] == ORIGINAL_FID):
         id_field = "FID"
       else:

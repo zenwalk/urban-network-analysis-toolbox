@@ -166,8 +166,8 @@ def compute_centrality(nodes, compute_r, compute_g, compute_b, compute_c,
         if w != s:
           between_w = getattr(nodes[w], BETWEENNESS)
           setattr(nodes[w], BETWEENNESS, between_w + (delta_w * weight_s) / 2.0)
-    if compute_c: setattr(nodes[s], CLOSENESS, (1.0 / d_sum_s if d_sum_s > 0 else
-        0.0))
+    if compute_c: setattr(nodes[s], CLOSENESS, (1.0 / d_sum_s if d_sum_s > 0
+        else 0.0))
     if compute_s: setattr(nodes[s], STRAIGHTNESS, straightness_s)
 
     nodes[s].reach = reach_s

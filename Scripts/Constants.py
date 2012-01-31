@@ -17,6 +17,10 @@ from os.path import pardir
 from sys import maxint
 from sys import path
 
+# Location of Scripts
+SCRIPT_DIR = path[0]
+SCRIPT_PARENT_DIR = abspath(join(SCRIPT_DIR, pardir))
+
 """
 The six steps of the tool
 """
@@ -84,6 +88,7 @@ WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d "
     "input points not recorded in graph" % (not_in_graph, (in_graph +
     not_in_graph)))
 WARNING_NO_NODES = "No nodes in graph"
+WARNING_APPLY_SYMBOLOGY_FAILED = "Failed to apply symbology to output layer"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
 
 POINT_CONVERSION_STARTED = ("... [started] Converting polygons to network "
@@ -183,8 +188,6 @@ layer_name = lambda base: "%s_Layer" % base
 symbology_layer_name= lambda shape_type, first_metric: (
     "%s_%s_Symbology_Layer.lyr" % (shape_type, first_metric))
 SYMBOLOGY_DIR_NAME = "Symbology_Layers"
-SCRIPT_DIR = path[0] # Path for the "Scripts" directory
-SCRIPT_PARENT_DIR = abspath(join(SCRIPT_DIR, pardir))
 SYMBOLOGY_DIR = join(SCRIPT_PARENT_DIR, SYMBOLOGY_DIR_NAME)
 ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"

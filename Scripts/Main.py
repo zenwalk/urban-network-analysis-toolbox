@@ -11,9 +11,9 @@
 Script for taking in the inputs to the toolbox and returning its outputs.
 """
 
-from Adjacency_List_Computation import compute_adjacency_list
 import arcgisscripting
 import arcpy
+from Adjacency_List_Computation import compute_adjacency_list
 from Centrality_Computation import compute_centrality
 from Constants import ACCUMULATOR_ATTRIBUTES
 from Constants import ADJACENCY_LIST_COMPUTED
@@ -31,6 +31,7 @@ from Constants import feature_class_name
 from Constants import FINAL_ATTRIBUTES
 from Constants import ID_ATTRIBUTE
 from Constants import IMPEDANCE_ATTRIBUTE
+from Constants import index
 from Constants import INFINITE_RADIUS
 from Constants import INPUT_BUILDINGS
 from Constants import INPUT_BUILDINGS_COPY_FAILED
@@ -84,6 +85,7 @@ from Constants import STEP_6_STARTED
 from Constants import SUCCESS
 from Constants import SYMBOLOGY_DIR
 from Constants import symbology_layer_name
+from Constants import WARNING_APPLY_SYMBOLOGY_FAILED
 from Constants import WARNING_FAIL_TO_DISPLAY
 from Constants import WARNING_NO_NODES
 from Constants import WARNING_OUTPUT_ALREADY_EXISTS
@@ -109,12 +111,8 @@ success = True
 # Inputs to the tool
 if len(argv) != INPUT_COUNT + 1:
   raise Exception("Invalid number of inputs")
-def index():
-  i = 1
-  while True:
-    yield i
-    i += 1
 input_number = index()
+input_number.next() # Skip over sys.argv[0]
 inputs = {}
 inputs[INPUT_BUILDINGS] = argv[input_number.next()]
 inputs[POINT_LOCATION] = ("INSIDE" if argv[input_number.next()] == "true" else
@@ -180,7 +178,7 @@ elif buildings_description.shapeType == "Polygon":
       basename(output_feature_class), inputs[POINT_LOCATION])
   inputs[INPUT_POINTS] = "%s.shp" % join(inputs[OUTPUT_LOCATION],
       point_feature_class_name)
-  # If FID is used as ID attribute, we need to change it since a new shapefile
+  # If FID is used as ID attribute, we need to change it since a point shapefile
   #     will be in use
   if inputs[ID_ATTRIBUTE] == "FID":
     inputs[ID_ATTRIBUTE] = ORIGINAL_FID
@@ -188,7 +186,7 @@ else:
   # Input buildings need to be either points or polygons
   raise Invalid_Input_Exception("Input Buildings")
 
-# Appropriate symbology layer name
+# Find the appropriate symbology layer
 for metric_index in range(len(METRICS)):
     if inputs[COMPUTE_REACH + metric_index]:
         first_metric = METRICS[metric_index]
@@ -220,7 +218,6 @@ try:
   """
   Here we carry out the six steps of the tool
   """
-
   # Step 1
   if success:
     arcpy.AddMessage(STEP_1_STARTED)
@@ -253,10 +250,8 @@ try:
       accumulator_fields = set([trim("Total_%s" % accumulator_attribute)
           for accumulator_attribute in inputs[ACCUMULATOR_ATTRIBUTES].split(";")
           if accumulator_attribute != "#"])
-
       # Graph representation: dictionary mapping node id's to Node objects
       nodes = {}
-
       # The number of rows in |adj_dbf|
       directed_edge_count = int(arcpy.GetCount_management(adj_dbf).getOutput(0))
       graph_progress = Progress_Bar(directed_edge_count, 1, STEP_2)
@@ -266,12 +261,10 @@ try:
         origin_id = row.getValue(trim(ORIGIN_ID_FIELD_NAME))
         destination_id = row.getValue(trim(DESTINATION_ID_FIELD_NAME))
         distance = float(row.getValue(distance_field))
-
         # Make sure the nodes are recorded in the graph
         for id in [origin_id, destination_id]:
           if not id in nodes:
             nodes[id] = Node()
-
         # Make sure that the nodes are neighbors in the graph
         if origin_id != destination_id and distance >= 0:
           accumulations = {}
@@ -279,9 +272,7 @@ try:
             accumulations[field] = float(row.getValue(field))
           nodes[origin_id].add_neighbor(destination_id, distance, accumulations)
           nodes[destination_id].add_neighbor(origin_id, distance, accumulations)
-
         graph_progress.step()
-
       N = len(nodes) # The number of nodes in the graph
       if N == 0:
         arcpy.AddWarning(WARNING_NO_NODES)
@@ -298,36 +289,28 @@ try:
     try:
       get_weights = inputs[NODE_WEIGHT_ATTRIBUTE] != "#"
       get_locations = inputs[COMPUTE_STRAIGHTNESS]
-
       # Keep track of number nodes in |input_points| not present in the graph
       point_not_in_graph_count = 0
-
       input_point_count = int(
           arcpy.GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
       node_attribute_progress = Progress_Bar(input_point_count, 1, STEP_3)
       rows = arcpy.UpdateCursor(inputs[INPUT_POINTS])
       for row in rows:
         id = row.getValue(inputs[ID_ATTRIBUTE])
-
         if not id in nodes:
           point_not_in_graph_count += 1
           continue
-
         if get_weights:
           setattr(nodes[id], WEIGHT,
               row.getValue(trim(inputs[NODE_WEIGHT_ATTRIBUTE])))
-
         if get_locations:
           snap_x = row.getValue(trim("SnapX"))
           snap_y = row.getValue(trim("SnapY"))
           setattr(nodes[id], LOCATION, (snap_x, snap_y))
-
         node_attribute_progress.step()
-
       if point_not_in_graph_count:
         arcpy.AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N,
             point_not_in_graph_count))
-
       arcpy.AddMessage(STEP_3_FINISHED)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
@@ -363,7 +346,7 @@ try:
       test_node = nodes.values()[0]
       measures = set([measure for measure in dir(test_node) if (measure in
           FINAL_ATTRIBUTES or is_accumulator_field(measure))])
-      # Add a field in the output layer for each computed meatric
+      # Add a field in the output layer for each computed metric
       for measure in measures:
         arcpy.AddField_management(in_table=output_layer,
             field_name=trim(measure), field_type="DOUBLE",
@@ -392,28 +375,26 @@ try:
   # Step 6
   if success:
     arcpy.AddMessage(STEP_6_STARTED)
+    # Apply symbology
     try:
-      # Apply symbology
       arcpy.ApplySymbologyFromLayer_management(in_layer=output_layer,
           in_symbology_layer=symbology_layer)
     except:
+      arcpy.AddWarning(WARNING_APPLY_SYMBOLOGY_FAILED)
       arcpy.AddWarning(arcpy.GetMessages(2))
       arcpy.AddMessage(STEP_6_FAILED)
-      success = False
-
     # Display
-    if success:
-      try:
-        current_map_document = arcpy.mapping.MapDocument("CURRENT")
-        data_frame = arcpy.mapping.ListDataFrames(current_map_document,
-            "Layers")[0]
-        add_layer = arcpy.mapping.Layer(output_layer)
-        arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
-        arcpy.AddMessage(STEP_6_FINISHED)
-      except:
-        arcpy.AddWarning(WARNING_FAIL_TO_DISPLAY)
-        arcpy.AddWarning(arcpy.GetMessages(2))
-        arcpy.AddMessage(STEP_6_FAILED)
+    try:
+      current_map_document = arcpy.mapping.MapDocument("CURRENT")
+      data_frame = arcpy.mapping.ListDataFrames(current_map_document,
+          "Layers")[0]
+      add_layer = arcpy.mapping.Layer(output_layer)
+      arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
+      arcpy.AddMessage(STEP_6_FINISHED)
+    except:
+      arcpy.AddWarning(WARNING_FAIL_TO_DISPLAY)
+      arcpy.AddWarning(arcpy.GetMessages(2))
+      arcpy.AddMessage(STEP_6_FAILED)
 
   # Clean up
   clean_up()

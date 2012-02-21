@@ -363,7 +363,9 @@ try:
       for row in layer_rows:
           id = row.getValue(id_field)
           for measure in measures:
-            row.setValue(trim(measure), getattr(nodes[id], measure))
+            # If no value was computed for this node id, set value to 0
+            value = getattr(nodes[id], measure) if id in nodes else 0
+            row.setValue(trim(measure), value)
           layer_rows.updateRow(row)
           write_progress.step()
       arcpy.AddMessage(STEP_5_FINISHED)

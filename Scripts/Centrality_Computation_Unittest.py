@@ -9,7 +9,10 @@
 
 """
 Unittest for the centrality metric computation.
+These are very basic sanity checks, they do not fully test the centrality
+  computation algorithm.
 """
+# TODO(mikemeko): add more tests
 
 from Centrality_Computation import compute_centrality
 from Constants import INFINITE_RADIUS
@@ -124,7 +127,7 @@ class TestBetweenness(unittest.TestCase):
         INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], BETWEENNESS), 0)
     assert eq_tol(getattr(self.graph["B"], BETWEENNESS), 0)
-    assert eq_tol(getattr(self.graph["C"], BETWEENNESS), 3)
+    assert eq_tol(getattr(self.graph["C"], BETWEENNESS), 6)
     assert eq_tol(getattr(self.graph["D"], BETWEENNESS), 0)
 
 class TestCloseness(unittest.TestCase):

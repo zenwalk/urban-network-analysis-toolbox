@@ -142,9 +142,11 @@ inputs[ACCUMULATOR_ATTRIBUTES] = argv[input_number.next()]
 selected_features = all_values_in_column(inputs[INPUT_BUILDINGS],
   inputs[ID_ATTRIBUTE])
 # Clear selection if we got a layer file
-if arcpy.Describe(inputs[INPUT_BUILDINGS]).extension == "lyr":
+try:
   arcpy.SelectLayerByAttribute_management(inputs[INPUT_BUILDINGS],
     "CLEAR_SELECTION")
+except:
+  pass
 
 # Adjacency List table name
 adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,

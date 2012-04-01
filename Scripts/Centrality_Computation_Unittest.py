@@ -55,13 +55,14 @@ class TestReach(unittest.TestCase):
     """
     Setup
     """
-    self.graph = construct_graph(["A", "B", "C", "D"], [("A", "B", 1),
-        ("A", "C", 1), ("B", "C", 1), ("C", "D", 1)])
+    self.nodes = ["A", "B", "C", "D"]
+    self.edges = [("A", "B", 1), ("A", "C", 1), ("B", "C", 1), ("C", "D", 1)]
+    self.graph = construct_graph(self.nodes, self.edges)
   def test_Infinite_Reach(self):
     """
     Test reach at infinite radius
     """
-    compute_centrality(self.graph, True, False, False, False, False,
+    compute_centrality(self.graph, self.nodes, True, False, False, False, False,
         INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], REACH), 3)
     assert eq_tol(getattr(self.graph["B"], REACH), 3)
@@ -71,8 +72,8 @@ class TestReach(unittest.TestCase):
     """
     Test reach at radius 1 - the reach values are no the degrees of the nodes
     """
-    compute_centrality(self.graph, True, False, False, False, False, 1, 1, [],
-        [])
+    compute_centrality(self.graph, self.nodes, True, False, False, False, False,
+        1, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], REACH), 2)
     assert eq_tol(getattr(self.graph["B"], REACH), 2)
     assert eq_tol(getattr(self.graph["C"], REACH), 3)
@@ -91,13 +92,15 @@ class TestGravity(unittest.TestCase):
     """
     Setup
     """
-    self.graph = construct_graph(["A", "B", "C", "D"], [("A", "B", log(3)),
-        ("A", "C", log(2)), ("B", "C", log(2)), ("C", "D", log(3))])
+    self.nodes = ["A", "B", "C", "D"]
+    self.edges = [("A", "B", log(3)), ("A", "C", log(2)), ("B", "C", log(2)),
+        ("C", "D", log(3))]
+    self.graph = construct_graph(self.nodes, self.edges)
   def test_Gravity(self):
     """
     Test gravity at infinite radius and a beta value of 1
     """
-    compute_centrality(self.graph, False, True, False, False, False,
+    compute_centrality(self.graph, self.nodes, False, True, False, False, False,
         INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], GRAVITY), 1)
     assert eq_tol(getattr(self.graph["B"], GRAVITY), 1)
@@ -117,13 +120,14 @@ class TestBetweenness(unittest.TestCase):
     """
     Setup
     """
-    self.graph = construct_graph(["A", "B", "C", "D"], [("A", "C", 1),
-        ("B", "C", 1), ("C", "D", 1)])
+    self.nodes = ["A", "B", "C", "D"]
+    self.edges = [("A", "C", 1), ("B", "C", 1), ("C", "D", 1)]
+    self.graph = construct_graph(self.nodes, self.edges)
   def test_Betweenness(self):
     """
     Test betweenness at infinite radius
     """
-    compute_centrality(self.graph, False, False, True, False, False,
+    compute_centrality(self.graph, self.nodes, False, False, True, False, False,
         INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], BETWEENNESS), 0)
     assert eq_tol(getattr(self.graph["B"], BETWEENNESS), 0)
@@ -143,13 +147,14 @@ class TestCloseness(unittest.TestCase):
     """
     Setup
     """
-    self.graph = construct_graph(["A", "B", "C", "D"], [("A", "B", 2),
-        ("A", "C", 1), ("B", "C", 1), ("C", "D", 3)])
+    self.nodes = ["A", "B", "C", "D"]
+    self.edges = [("A", "B", 2), ("A", "C", 1), ("B", "C", 1), ("C", "D", 3)]
+    self.graph = construct_graph(self.nodes, self.edges)
   def test_Closeness(self):
     """
     Test closeness at infinite radius
     """
-    compute_centrality(self.graph, False, False, False, True, False,
+    compute_centrality(self.graph, self.nodes, False, False, False, True, False,
         INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], CLOSENESS), 1.0 / 7)
     assert eq_tol(getattr(self.graph["B"], CLOSENESS), 1.0 / 7)
@@ -172,8 +177,10 @@ class TestStraightness(unittest.TestCase):
     """
     Setup
     """
-    self.graph = construct_graph(["A", "B", "C", "D"], [("A", "B", 2),
-        ("A", "C", sqrt(2)), ("B", "C", sqrt(2)), ("C", "D", 1)])
+    self.nodes = ["A", "B", "C", "D"]
+    self.edges = [("A", "B", 2), ("A", "C", sqrt(2)), ("B", "C", sqrt(2)),
+        ("C", "D", 1)]
+    self.graph = construct_graph(self.nodes, self.edges)
     setattr(self.graph["A"], LOCATION, (-1, 1))
     setattr(self.graph["B"], LOCATION, (-1, -1))
     setattr(self.graph["C"], LOCATION, (0, 0))
@@ -182,7 +189,7 @@ class TestStraightness(unittest.TestCase):
     """
     Test straightness at infinite radius
     """
-    compute_centrality(self.graph, False, False, False, False, True,
+    compute_centrality(self.graph, self.nodes, False, False, False, False, True,
         INFINITE_RADIUS, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], STRAIGHTNESS),
         2 + sqrt(5) / (1 + sqrt(2)))

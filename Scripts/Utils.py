@@ -93,6 +93,18 @@ def to_point_feature_class(feature_class, point_feature_class, point_location):
         out_feature_class=point_feature_class,
         point_location=point_location)
 
+def all_values_in_column(table, column):
+  """
+  Returns a set of all the values in the some column of a table
+  |table|: a dbf
+  |column|: the name of a column in the table, the column must be in the table
+  """
+  values = set()
+  rows = arcpy.UpdateCursor(table)
+  for row in rows:
+    values.add(row.getValue(column))
+  return values
+
 def eq_tol(a, b):
   """
   Returns True if |a| and |b| are within |TOLERANCE|, False otherwise

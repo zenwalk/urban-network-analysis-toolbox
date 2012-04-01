@@ -37,11 +37,13 @@ from Utils import lt_tol
 from Utils import merge_maps
 from Utils import Progress_Bar
 
-def compute_centrality(nodes, compute_r, compute_g, compute_b, compute_c,
-    compute_s, radius, beta, measures_to_normalize, accumulator_fields):
+def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
+    compute_c, compute_s, radius, beta, measures_to_normalize,
+    accumulator_fields):
   """
   Computes reach, gravity, betweenness, closeness, and straightness on a graph.
   |nodes|: graph representation; dictionary mapping node id's to |Node| objects
+  |origins|: subset of nodes that will be used as sources of shortest path trees
   |compute_r|: compute reach?
   |compute_g|: compute gravity type index?
   |compute_b|: compute betweenness?
@@ -56,7 +58,8 @@ def compute_centrality(nodes, compute_r, compute_g, compute_b, compute_c,
 
   # Number of nodes in the graph
   N = len(nodes)
-  if N == 0:
+  O = len(origins)
+  if N == 0 or O == 0:
     return
 
   # Preprocessing
@@ -74,8 +77,8 @@ def compute_centrality(nodes, compute_r, compute_g, compute_b, compute_c,
   sum_weights = 0.0
 
   # Computation
-  progress = Progress_Bar(N, 1, STEP_4)
-  for s in nodes:
+  progress = Progress_Bar(O, 1, STEP_4)
+  for s in origins:
     weight_s = getattr(nodes[s], WEIGHT)
     if have_locations: location_s = getattr(nodes[s], LOCATION)
 
@@ -162,10 +165,11 @@ def compute_centrality(nodes, compute_r, compute_g, compute_b, compute_c,
         w = S.pop()
         delta_w = delta[w] if w in delta else 0.0 # Dependency of |s| on |w|
         for v in P[w]:
-          delta[v] += sigma[v] / sigma[w] * (1 + delta_w)
+          weight_w = getattr(nodes[w], WEIGHT)
+          delta[v] += sigma[v] / sigma[w] * (weight_w + delta_w)
         if w != s:
           between_w = getattr(nodes[w], BETWEENNESS)
-          setattr(nodes[w], BETWEENNESS, between_w + delta_w * weight_s)
+          setattr(nodes[w], BETWEENNESS, between_w + delta_w)
     if compute_c: setattr(nodes[s], CLOSENESS, (1.0 / d_sum_s if d_sum_s > 0
         else 0.0))
     if compute_s: setattr(nodes[s], STRAIGHTNESS, straightness_s)
@@ -185,8 +189,8 @@ def compute_centrality(nodes, compute_r, compute_g, compute_b, compute_c,
 
   # Normalization
   if measures_to_normalize:
-    norm_progress = Progress_Bar(N, 1, PROGRESS_NORMALIZATION)
-    for s in nodes:
+    norm_progress = Progress_Bar(O, 1, PROGRESS_NORMALIZATION)
+    for s in origins:
       reach_s = nodes[s].reach
       weighted_reach_s = nodes[s].weighted_reach
 

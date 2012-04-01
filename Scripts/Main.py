@@ -94,6 +94,7 @@ from Constants import WEIGHT
 from Node import Node
 from os.path import join
 from sys import argv
+from Utils import all_values_in_column
 from Utils import basename
 from Utils import delete
 from Utils import Invalid_Input_Exception
@@ -135,6 +136,15 @@ inputs[NORMALIZE_RESULTS] = [measure for measure in
 inputs[OUTPUT_LOCATION] = argv[input_number.next()]
 inputs[OUTPUT_FILE_NAME] = argv[input_number.next()]
 inputs[ACCUMULATOR_ATTRIBUTES] = argv[input_number.next()]
+
+# Record the origin nodes for centrality measurements
+# This is important if the user selects a subset of the features to be origins
+selected_features = all_values_in_column(inputs[INPUT_BUILDINGS],
+  inputs[ID_ATTRIBUTE])
+# Clear selection if we got a layer file
+if arcpy.Describe(inputs[INPUT_BUILDINGS]).extension == "lyr":
+  arcpy.SelectLayerByAttribute_management(inputs[INPUT_BUILDINGS],
+    "CLEAR_SELECTION")
 
 # Adjacency List table name
 adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
@@ -289,7 +299,7 @@ try:
     try:
       get_weights = inputs[NODE_WEIGHT_ATTRIBUTE] != "#"
       get_locations = inputs[COMPUTE_STRAIGHTNESS]
-      # Keep track of number nodes in |input_points| not present in the graph
+      # Keep track of number nodes in input points not present in the graph
       point_not_in_graph_count = 0
       input_point_count = int(
           arcpy.GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
@@ -322,10 +332,11 @@ try:
     arcpy.AddMessage(STEP_4_STARTED)
     try:
       # Compute measures
-      compute_centrality(nodes, inputs[COMPUTE_REACH], inputs[COMPUTE_GRAVITY],
-          inputs[COMPUTE_BETWEENNESS], inputs[COMPUTE_CLOSENESS],
-          inputs[COMPUTE_STRAIGHTNESS], inputs[SEARCH_RADIUS], inputs[BETA],
-          inputs[NORMALIZE_RESULTS], accumulator_fields)
+      compute_centrality(nodes, selected_features, inputs[COMPUTE_REACH],
+          inputs[COMPUTE_GRAVITY], inputs[COMPUTE_BETWEENNESS],
+          inputs[COMPUTE_CLOSENESS], inputs[COMPUTE_STRAIGHTNESS],
+          inputs[SEARCH_RADIUS], inputs[BETA], inputs[NORMALIZE_RESULTS],
+          accumulator_fields)
       arcpy.AddMessage(STEP_4_FINISHED)
     except:
       arcpy.AddWarning(arcpy.GetMessages(2))
@@ -343,7 +354,7 @@ try:
       arcpy.SaveToLayerFile_management(output_layer_name, output_layer,
           "ABSOLUTE")
       # Use a test node to figure out which metrics were computed
-      test_node = nodes.values()[0]
+      test_node = nodes[selected_features.pop()]
       measures = set([measure for measure in dir(test_node) if (measure in
           FINAL_ATTRIBUTES or is_accumulator_field(measure))])
       # Add a field in the output layer for each computed metric
@@ -364,7 +375,9 @@ try:
           id = row.getValue(id_field)
           for measure in measures:
             # If no value was computed for this node id, set value to 0
-            value = getattr(nodes[id], measure) if id in nodes else 0
+            value = 0
+            if id in nodes and hasattr(nodes[id], measure):
+              value = getattr(nodes[id], measure)
             row.setValue(trim(measure), value)
           layer_rows.updateRow(row)
           write_progress.step()

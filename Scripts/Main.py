@@ -11,8 +11,24 @@
 Script for taking in the inputs to the toolbox and returning its outputs.
 """
 
-import arcgisscripting
-import arcpy
+from arcgisscripting import ExecuteAbort
+from arcpy import AddField_management
+from arcpy import AddMessage
+from arcpy import AddWarning
+from arcpy import ApplySymbologyFromLayer_management
+from arcpy import CheckOutExtension
+from arcpy import CopyFeatures_management
+from arcpy import CreateFeatureclass_management
+from arcpy import Describe
+from arcpy import env
+from arcpy import Exists
+from arcpy import GetCount_management
+from arcpy import GetMessages
+from arcpy import MakeFeatureLayer_management
+from arcpy import mapping
+from arcpy import SaveToLayerFile_management
+from arcpy import SelectLayerByAttribute_management
+from arcpy import UpdateCursor
 from Adjacency_List_Computation import compute_adjacency_list
 from Centrality_Computation import compute_centrality
 from Constants import ACCUMULATOR_ATTRIBUTES
@@ -103,8 +119,8 @@ from Utils import Progress_Bar
 from Utils import to_point_feature_class
 from Utils import trim
 
-arcpy.env.overwriteOutput = True # Enable overwritting
-arcpy.CheckOutExtension("Network")
+env.overwriteOutput = True # Enable overwritting
+CheckOutExtension("Network")
 
 # Success of the program through the six steps
 success = True
@@ -143,7 +159,7 @@ selected_features = all_values_in_column(inputs[INPUT_BUILDINGS],
   inputs[ID_ATTRIBUTE])
 # Clear selection if we got a layer file
 try:
-  arcpy.SelectLayerByAttribute_management(inputs[INPUT_BUILDINGS],
+  SelectLayerByAttribute_management(inputs[INPUT_BUILDINGS],
     "CLEAR_SELECTION")
 except:
   pass
@@ -161,26 +177,26 @@ output_feature_class = "%s.shp" % join(inputs[OUTPUT_LOCATION],
     output_feature_class_name)
 # Create a feature class that is a copy of the input buildings
 try:
-  arcpy.AddMessage(INPUT_BUILDINGS_COPY_STARTED)
-  arcpy.CreateFeatureclass_management(out_path=inputs[OUTPUT_LOCATION],
+  AddMessage(INPUT_BUILDINGS_COPY_STARTED)
+  CreateFeatureclass_management(out_path=inputs[OUTPUT_LOCATION],
       out_name=output_feature_class_name)
-  arcpy.CopyFeatures_management(in_features=inputs[INPUT_BUILDINGS],
+  CopyFeatures_management(in_features=inputs[INPUT_BUILDINGS],
       out_feature_class=output_feature_class)
-  arcpy.AddMessage(INPUT_BUILDINGS_COPY_FINISHED)
+  AddMessage(INPUT_BUILDINGS_COPY_FINISHED)
 except:
-  arcpy.AddWarning(arcpy.GetMessages(2))
-  arcpy.AddMessage(INPUT_BUILDINGS_COPY_FAILED)
+  AddWarning(GetMessages(2))
+  AddMessage(INPUT_BUILDINGS_COPY_FAILED)
   success = False
 output_layer_name = layer_name(inputs[OUTPUT_FILE_NAME])
 output_layer = "%s.lyr" % join(inputs[OUTPUT_LOCATION], output_layer_name)
 
 # If output has already been created, don't carry on
-if arcpy.Exists(output_layer):
-  arcpy.AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
+if Exists(output_layer):
+  AddWarning(WARNING_OUTPUT_ALREADY_EXISTS)
   success = False
 
 # We will convert polygon input buildings to point feature class
-buildings_description = arcpy.Describe(output_feature_class)
+buildings_description = Describe(output_feature_class)
 if buildings_description.shapeType == "Point":
   # Input buildings are already a point shape file
   inputs[INPUT_POINTS] = output_feature_class
@@ -232,31 +248,31 @@ try:
   """
   # Step 1
   if success:
-    arcpy.AddMessage(STEP_1_STARTED)
+    AddMessage(STEP_1_STARTED)
     # If necessary, convert input buildings to point feature class
     if buildings_description.shapeType == "Polygon":
-      arcpy.AddMessage(POINT_CONVERSION_STARTED)
+      AddMessage(POINT_CONVERSION_STARTED)
       to_point_feature_class(output_feature_class, inputs[INPUT_POINTS],
           inputs[POINT_LOCATION])
-      arcpy.AddMessage(POINT_CONVERSION_FINISHED)
-    if arcpy.Exists(adj_dbf):
-      arcpy.AddMessage(ADJACENCY_LIST_COMPUTED)
-      arcpy.AddMessage(STEP_1_FINISHED)
+      AddMessage(POINT_CONVERSION_FINISHED)
+    if Exists(adj_dbf):
+      AddMessage(ADJACENCY_LIST_COMPUTED)
+      AddMessage(STEP_1_FINISHED)
     else:
       try:
         compute_adjacency_list(inputs[INPUT_POINTS], inputs[INPUT_NETWORK],
             inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
             inputs[ACCUMULATOR_ATTRIBUTES], inputs[SEARCH_RADIUS],
             inputs[OUTPUT_LOCATION], adj_dbf_name)
-        arcpy.AddMessage(STEP_1_FINISHED)
+        AddMessage(STEP_1_FINISHED)
       except:
-        arcpy.AddWarning(arcpy.GetMessages(2))
-        arcpy.AddMessage(STEP_1_FAILED)
+        AddWarning(GetMessages(2))
+        AddMessage(STEP_1_FAILED)
         success = False
 
   # Step 2
   if success:
-    arcpy.AddMessage(STEP_2_STARTED)
+    AddMessage(STEP_2_STARTED)
     try:
       distance_field = trim("Total_%s" % inputs[IMPEDANCE_ATTRIBUTE])
       accumulator_fields = set([trim("Total_%s" % accumulator_attribute)
@@ -265,9 +281,9 @@ try:
       # Graph representation: dictionary mapping node id's to Node objects
       nodes = {}
       # The number of rows in |adj_dbf|
-      directed_edge_count = int(arcpy.GetCount_management(adj_dbf).getOutput(0))
+      directed_edge_count = int(GetCount_management(adj_dbf).getOutput(0))
       graph_progress = Progress_Bar(directed_edge_count, 1, STEP_2)
-      rows = arcpy.UpdateCursor(adj_dbf)
+      rows = UpdateCursor(adj_dbf)
       for row in rows:
         # Get neighboring nodes, and the distance between them
         origin_id = row.getValue(trim(ORIGIN_ID_FIELD_NAME))
@@ -287,26 +303,26 @@ try:
         graph_progress.step()
       N = len(nodes) # The number of nodes in the graph
       if N == 0:
-        arcpy.AddWarning(WARNING_NO_NODES)
+        AddWarning(WARNING_NO_NODES)
         success = False
-      arcpy.AddMessage(STEP_2_FINISHED)
+      AddMessage(STEP_2_FINISHED)
     except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_2_FAILED)
+      AddWarning(GetMessages(2))
+      AddMessage(STEP_2_FAILED)
       success = False
 
   # Step 3
   if success:
-    arcpy.AddMessage(STEP_3_STARTED)
+    AddMessage(STEP_3_STARTED)
     try:
       get_weights = inputs[NODE_WEIGHT_ATTRIBUTE] != "#"
       get_locations = inputs[COMPUTE_STRAIGHTNESS]
       # Keep track of number nodes in input points not present in the graph
       point_not_in_graph_count = 0
       input_point_count = int(
-          arcpy.GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
+          GetCount_management(inputs[INPUT_POINTS]).getOutput(0))
       node_attribute_progress = Progress_Bar(input_point_count, 1, STEP_3)
-      rows = arcpy.UpdateCursor(inputs[INPUT_POINTS])
+      rows = UpdateCursor(inputs[INPUT_POINTS])
       for row in rows:
         id = row.getValue(inputs[ID_ATTRIBUTE])
         if not id in nodes:
@@ -321,17 +337,17 @@ try:
           setattr(nodes[id], LOCATION, (snap_x, snap_y))
         node_attribute_progress.step()
       if point_not_in_graph_count:
-        arcpy.AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N,
+        AddWarning(WARNING_POINTS_NOT_IN_GRAPH(N,
             point_not_in_graph_count))
-      arcpy.AddMessage(STEP_3_FINISHED)
+      AddMessage(STEP_3_FINISHED)
     except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_3_FAILED)
+      AddWarning(GetMessages(2))
+      AddMessage(STEP_3_FAILED)
       success = False
 
   # Step 4
   if success:
-    arcpy.AddMessage(STEP_4_STARTED)
+    AddMessage(STEP_4_STARTED)
     try:
       # Compute measures
       compute_centrality(nodes, selected_features, inputs[COMPUTE_REACH],
@@ -339,21 +355,21 @@ try:
           inputs[COMPUTE_CLOSENESS], inputs[COMPUTE_STRAIGHTNESS],
           inputs[SEARCH_RADIUS], inputs[BETA], inputs[NORMALIZE_RESULTS],
           accumulator_fields)
-      arcpy.AddMessage(STEP_4_FINISHED)
+      AddMessage(STEP_4_FINISHED)
     except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_4_FAILED)
+      AddWarning(GetMessages(2))
+      AddMessage(STEP_4_FAILED)
       success = False
 
   # Step 5
   if success:
-    arcpy.AddMessage(STEP_5_STARTED)
+    AddMessage(STEP_5_STARTED)
     try:
       # Make output layer
-      arcpy.MakeFeatureLayer_management(in_features=output_feature_class,
+      MakeFeatureLayer_management(in_features=output_feature_class,
           out_layer=output_layer_name)
       # Save output layer
-      arcpy.SaveToLayerFile_management(output_layer_name, output_layer,
+      SaveToLayerFile_management(output_layer_name, output_layer,
           "ABSOLUTE")
       # Use a test node to figure out which metrics were computed
       test_node = nodes[selected_features.pop()]
@@ -361,9 +377,8 @@ try:
           FINAL_ATTRIBUTES or is_accumulator_field(measure))])
       # Add a field in the output layer for each computed metric
       for measure in measures:
-        arcpy.AddField_management(in_table=output_layer,
-            field_name=trim(measure), field_type="DOUBLE",
-            field_is_nullable="NON_NULLABLE")
+        AddField_management(in_table=output_layer, field_name=trim(measure),
+            field_type="DOUBLE", field_is_nullable="NON_NULLABLE")
       # Figure out the id field to use based on the type of the input buildings
       if (buildings_description.shapeType == "Polygon" and
           inputs[ID_ATTRIBUTE] == ORIGINAL_FID):
@@ -372,7 +387,7 @@ try:
         id_field = inputs[ID_ATTRIBUTE]
       # Fill the layer with the metric values
       write_progress = Progress_Bar(N, 1, STEP_5)
-      layer_rows = arcpy.UpdateCursor(output_layer)
+      layer_rows = UpdateCursor(output_layer)
       for row in layer_rows:
           id = row.getValue(id_field)
           for measure in measures:
@@ -383,41 +398,41 @@ try:
             row.setValue(trim(measure), value)
           layer_rows.updateRow(row)
           write_progress.step()
-      arcpy.AddMessage(STEP_5_FINISHED)
+      AddMessage(STEP_5_FINISHED)
     except:
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_5_FAILED)
+      AddWarning(GetMessages(2))
+      AddMessage(STEP_5_FAILED)
       success = False
 
   # Step 6
   if success:
-    arcpy.AddMessage(STEP_6_STARTED)
+    AddMessage(STEP_6_STARTED)
     # Apply symbology
     try:
-      arcpy.ApplySymbologyFromLayer_management(in_layer=output_layer,
+      ApplySymbologyFromLayer_management(in_layer=output_layer,
           in_symbology_layer=symbology_layer)
     except:
-      arcpy.AddWarning(WARNING_APPLY_SYMBOLOGY_FAILED)
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_6_FAILED)
+      AddWarning(WARNING_APPLY_SYMBOLOGY_FAILED)
+      AddWarning(GetMessages(2))
+      AddMessage(STEP_6_FAILED)
     # Display
     try:
-      current_map_document = arcpy.mapping.MapDocument("CURRENT")
-      data_frame = arcpy.mapping.ListDataFrames(current_map_document,
+      current_map_document = mapping.MapDocument("CURRENT")
+      data_frame = mapping.ListDataFrames(current_map_document,
           "Layers")[0]
-      add_layer = arcpy.mapping.Layer(output_layer)
-      arcpy.mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
-      arcpy.AddMessage(STEP_6_FINISHED)
+      add_layer = mapping.Layer(output_layer)
+      mapping.AddLayer(data_frame, add_layer, "AUTO_ARRANGE")
+      AddMessage(STEP_6_FINISHED)
     except:
-      arcpy.AddWarning(WARNING_FAIL_TO_DISPLAY)
-      arcpy.AddWarning(arcpy.GetMessages(2))
-      arcpy.AddMessage(STEP_6_FAILED)
+      AddWarning(WARNING_FAIL_TO_DISPLAY)
+      AddWarning(GetMessages(2))
+      AddMessage(STEP_6_FAILED)
 
   # Clean up
   clean_up()
 
-  if success: arcpy.AddMessage(SUCCESS)
-  else: arcpy.AddMessage(FAILURE)
+  if success: AddMessage(SUCCESS)
+  else: AddMessage(FAILURE)
 
-except arcgisscripting.ExecuteAbort:
+except ExecuteAbort:
   clean_up()

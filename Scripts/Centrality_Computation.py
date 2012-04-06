@@ -11,6 +11,7 @@
 Script for the computation of the five centrality metrics.
 """
 
+from arcpy import AddWarning
 from Constants import BETWEENNESS
 from Constants import CLOSENESS
 from Constants import GRAVITY
@@ -25,6 +26,7 @@ from Constants import PROGRESS_NORMALIZATION
 from Constants import REACH
 from Constants import STEP_4
 from Constants import STRAIGHTNESS
+from Constants import WARNING_NO_BETWEENNESS_NORMALIZATION
 from Constants import WEIGHT
 from heapq import heapify
 from heapq import heappop
@@ -188,6 +190,9 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
     progress.step()
 
   # Normalization
+  if BETWEENNESS in measures_to_normalize and O < N:
+      measures_to_normalize.remove(BETWEENNESS)
+      AddWarning(WARNING_NO_BETWEENNESS_NORMALIZATION)
   if measures_to_normalize:
     norm_progress = Progress_Bar(O, 1, PROGRESS_NORMALIZATION)
     for s in origins:

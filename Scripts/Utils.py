@@ -11,7 +11,15 @@
 Utility methods.
 """
 
-import arcpy
+from arcpy import AddMessage
+from arcpy import Delete_management
+from arcpy import Exists
+from arcpy import FeatureToPoint_management
+from arcpy import ResetProgressor
+from arcpy import SetProgressor
+from arcpy import SetProgressorLabel
+from arcpy import SetProgressorPosition
+from arcpy import UpdateCursor
 from Constants import POINT_CONVERSION_DONE
 from Constants import TOLERANCE
 from math import sqrt
@@ -66,18 +74,18 @@ class Progress_Bar:
     A generator representation of the arcpy progressor
     """
     # Setup progressor with min, max, interval, and label
-    arcpy.SetProgressor("step", "", 0, self.n, self.p)
-    arcpy.SetProgressorLabel(self.caption)
+    SetProgressor("step", "", 0, self.n, self.p)
+    SetProgressorLabel(self.caption)
     # Counter
     count = 0
     while True:
       # Update display
       if count % self.p == 0:
-        arcpy.SetProgressorPosition(count)
+        SetProgressorPosition(count)
       # Finished?
       if count == self.n:
-        arcpy.SetProgressorLabel("")
-        arcpy.ResetProgressor()
+        SetProgressorLabel("")
+        ResetProgressor()
       count += 1
       yield
 
@@ -86,10 +94,10 @@ def to_point_feature_class(feature_class, point_feature_class, point_location):
   Converts a feature class to a point feature class
   |point_location|: parameter for conversion, should be "CENTROID" or "INSIDE"
   """
-  if arcpy.Exists(point_feature_class):
-    arcpy.AddMessage(POINT_CONVERSION_DONE)
+  if Exists(point_feature_class):
+    AddMessage(POINT_CONVERSION_DONE)
   else:
-    arcpy.FeatureToPoint_management(in_features=feature_class,
+    FeatureToPoint_management(in_features=feature_class,
         out_feature_class=point_feature_class,
         point_location=point_location)
 
@@ -100,7 +108,7 @@ def all_values_in_column(table, column):
   |column|: the name of a column in the table, the column must be in the table
   """
   values = set()
-  rows = arcpy.UpdateCursor(table)
+  rows = UpdateCursor(table)
   for row in rows:
     values.add(row.getValue(column))
   return values
@@ -129,8 +137,8 @@ def delete(path):
   """
   try:
     # Attempt to delete using arcpy methods
-    if arcpy.Exists(path):
-      arcpy.Delete_management(path)
+    if Exists(path):
+      Delete_management(path)
   except:
     # If arcpy methods fail, attempt to delete using native methods
     try:

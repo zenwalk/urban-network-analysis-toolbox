@@ -90,6 +90,8 @@ WARNING_POINTS_NOT_IN_GRAPH = lambda in_graph, not_in_graph: ("%d out of %d "
 WARNING_NO_NODES = "No nodes in graph"
 WARNING_APPLY_SYMBOLOGY_FAILED = "Failed to apply symbology to output layer"
 WARNING_FAIL_TO_DISPLAY = "Layer produced but not displayed"
+WARNING_NO_BETWEENNESS_NORMALIZATION = ("Betweenness values were not normalized"
+    " since not all nodes were used as origins")
 
 POINT_CONVERSION_STARTED = ("... [started] Converting polygons to network "
     "locations")

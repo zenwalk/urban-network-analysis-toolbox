@@ -101,6 +101,7 @@ from Constants import STEP_6_STARTED
 from Constants import SUCCESS
 from Constants import SYMBOLOGY_DIR
 from Constants import symbology_layer_name
+from Constants import USE_NETWORK_RADIUS
 from Constants import WARNING_APPLY_SYMBOLOGY_FAILED
 from Constants import WARNING_FAIL_TO_DISPLAY
 from Constants import WARNING_NO_NODES
@@ -112,6 +113,7 @@ from os.path import join
 from sys import argv
 from Utils import all_values_in_column
 from Utils import basename
+from Utils import calculate_network_locations
 from Utils import delete
 from Utils import Invalid_Input_Exception
 from Utils import is_accumulator_field
@@ -145,6 +147,7 @@ inputs[NODE_WEIGHT_ATTRIBUTE] = argv[input_number.next()]
 inputs[IMPEDANCE_ATTRIBUTE] = argv[input_number.next()]
 try: inputs[SEARCH_RADIUS] = float(argv[input_number.next()])
 except: inputs[SEARCH_RADIUS] = INFINITE_RADIUS
+inputs[USE_NETWORK_RADIUS] = argv[input_number.next()] == "true"
 try: inputs[BETA] = float(argv[input_number.next()])
 except: raise Invalid_Input_Exception("Beta")
 inputs[NORMALIZE_RESULTS] = [measure for measure in
@@ -165,6 +168,8 @@ except:
   pass
 
 # Adjacency List table name
+node_locations_needed = (inputs[COMPUTE_STRAIGHTNESS] or
+    not inputs[USE_NETWORK_RADIUS])
 adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
     basename(inputs[INPUT_BUILDINGS]), basename(inputs[INPUT_NETWORK]),
     inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
@@ -257,6 +262,8 @@ try:
       AddMessage(POINT_CONVERSION_FINISHED)
     if Exists(adj_dbf):
       AddMessage(ADJACENCY_LIST_COMPUTED)
+      if node_locations_needed:
+        calculate_network_locations(inputs[INPUT_POINTS], inputs[INPUT_NETWORK])
       AddMessage(STEP_1_FINISHED)
     else:
       try:
@@ -316,7 +323,7 @@ try:
     AddMessage(STEP_3_STARTED)
     try:
       get_weights = inputs[NODE_WEIGHT_ATTRIBUTE] != "#"
-      get_locations = inputs[COMPUTE_STRAIGHTNESS]
+      get_locations = node_locations_needed
       # Keep track of number nodes in input points not present in the graph
       point_not_in_graph_count = 0
       input_point_count = int(
@@ -353,8 +360,8 @@ try:
       compute_centrality(nodes, selected_features, inputs[COMPUTE_REACH],
           inputs[COMPUTE_GRAVITY], inputs[COMPUTE_BETWEENNESS],
           inputs[COMPUTE_CLOSENESS], inputs[COMPUTE_STRAIGHTNESS],
-          inputs[SEARCH_RADIUS], inputs[BETA], inputs[NORMALIZE_RESULTS],
-          accumulator_fields)
+          inputs[SEARCH_RADIUS], inputs[USE_NETWORK_RADIUS], inputs[BETA],
+          inputs[NORMALIZE_RESULTS], accumulator_fields)
       AddMessage(STEP_4_FINISHED)
     except:
       AddWarning(GetMessages(2))

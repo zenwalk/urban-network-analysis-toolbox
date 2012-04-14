@@ -40,7 +40,7 @@ from Utils import merge_maps
 from Utils import Progress_Bar
 
 def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
-    compute_c, compute_s, radius, beta, measures_to_normalize,
+    compute_c, compute_s, radius, network_radius, beta, measures_to_normalize,
     accumulator_fields):
   """
   Computes reach, gravity, betweenness, closeness, and straightness on a graph.
@@ -53,6 +53,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
   |compute_s|: compute straightness?
   |radius|: for each node, only consider other nodes that can be reached within
       this distance
+  |network_radius|: use network radius or birds-eye radius?
   |beta|: parameter for gravity type index
   |measures_to_normalize|: a list of measures to normalize
   |accumulator_fields|: a list of cost attributes to accumulate
@@ -128,10 +129,15 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
       for w, d_vw, accumulations_vw in getattr(nodes[v], NEIGHBORS):
         # s ~ ... ~ v ~ w
         d_sw = d_sv + d_vw
+        enqueue_sw = d_sw
+        if not network_radius:
+            location_w = getattr(nodes[w], LOCATION)
+            enqueue_sw = dist(location_s, location_w) # Use Euclidean distance
+
         if compute_b: b_refresh = False
 
         if not w in d: # Found a path from |s| to |w| for the first time
-          if d_sw <= radius:
+          if enqueue_sw <= radius:
             heappush(Q, (d_sw, w)) # Add |w| to |Q|
             if have_accumulations:
               accumulations_s[w] = merge_maps(accumulations_s[v],
@@ -140,7 +146,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
           if compute_b: b_refresh = True
 
         elif lt_tol(d_sw, d[w]): # Found a better path from |s| to |w|
-          if d_sw <= radius:
+          if enqueue_sw <= radius:
             if d[w] <= radius:
               Q.remove((d[w], w))
               heapify(Q)

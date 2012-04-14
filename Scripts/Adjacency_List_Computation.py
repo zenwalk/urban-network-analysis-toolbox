@@ -14,10 +14,8 @@ Script for adjacency list computation.
 from arcpy import AddField_management
 from arcpy import AddLocations_na
 from arcpy import AddMessage
-from arcpy import AddWarning
 from arcpy import Append_management
 from arcpy import CalculateField_management
-from arcpy import CalculateLocations_na
 from arcpy import Describe
 from arcpy import env
 from arcpy import Exists
@@ -43,12 +41,8 @@ from Constants import BARRIER_COST_COMPUTATION_FINISHED
 from Constants import BARRIER_COST_COMPUTATION_STARTED
 from Constants import BARRIER_COST_FIELD
 from Constants import BARRIER_COST_PRE_PROCESSING
-from Constants import CALCULATE_LOCATIONS_FINISHED
-from Constants import CALCULATE_LOCATIONS_STARTED
 from Constants import DESTINATION_ID_FIELD_NAME
-from Constants import EDGE_FEATURE
 from Constants import INPUT_POINTS_LAYER_NAME
-from Constants import JUNCTION_FEATURE
 from Constants import NETWORK_LOCATION_FIELDS
 from Constants import OD_COST_MATRIX_LAYER_NAME
 from Constants import OD_COST_MATRIX_LINES
@@ -61,13 +55,12 @@ from Constants import RASTER_NAME
 from Constants import SEARCH_TOLERANCE
 from Constants import SNAP_OFFSET
 from Constants import STEP_1
-from Constants import WARNING_NO_EDGE_FEATURE
-from Constants import WARNING_NO_JUNCTION_FEATURE
 from math import sqrt
 from os import mkdir
 from os.path import join
+from Utils import calculate_network_locations
 from Utils import delete
-from Utils import Invalid_Input_Exception
+from Utils import network_features
 from Utils import Progress_Bar
 from Utils import row_has_field
 from Utils import trim
@@ -99,33 +92,14 @@ def compute_adjacency_list(input_points, input_network, id_attribute,
     mkdir(auxiliary_dir)
 
   # Record the edge and junction source names of |input_network|
-  edge_feature = None
-  junction_feature = None
-  for source in Describe(input_network).sources:
-    if source.sourceType == EDGE_FEATURE:
-      edge_feature = source.name
-    elif source.sourceType in JUNCTION_FEATURE:
-      junction_feature = source.name
-  if edge_feature == None:
-    AddWarning(WARNING_NO_EDGE_FEATURE(input_network))
-    raise Invalid_Input_Exception("Input Network")
-  if junction_feature == None:
-    AddWarning(WARNING_NO_JUNCTION_FEATURE(input_network))
-    raise Invalid_Input_Exception("Input Network")
+  junction_feature, edge_feature = network_features(input_network)
 
   # Calculate network locations if not already calculated
   test_input_point = UpdateCursor(input_points).next()
   locations_calculated = all(row_has_field(test_input_point, field)
       for field in NETWORK_LOCATION_FIELDS)
   if not locations_calculated:
-    AddMessage(CALCULATE_LOCATIONS_STARTED)
-    CalculateLocations_na(in_point_features=input_points,
-        in_network_dataset=input_network,
-        search_tolerance=SEARCH_TOLERANCE,
-        search_criteria=("%s SHAPE; %s SHAPE;" %
-            (junction_feature, edge_feature)),
-        exclude_restricted_elements="INCLUDE")
-    AddMessage(CALCULATE_LOCATIONS_FINISHED)
+    calculate_network_locations(input_points, input_network)
 
   # Calculate barrier cost per input point if not already calculated
   barrier_costs_calculated = row_has_field(test_input_point,

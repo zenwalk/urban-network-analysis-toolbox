@@ -12,7 +12,10 @@ Utility methods.
 """
 
 from arcpy import AddMessage
+from arcpy import AddWarning
+from arcpy import CalculateLocations_na
 from arcpy import Delete_management
+from arcpy import Describe
 from arcpy import Exists
 from arcpy import FeatureToPoint_management
 from arcpy import ResetProgressor
@@ -20,8 +23,15 @@ from arcpy import SetProgressor
 from arcpy import SetProgressorLabel
 from arcpy import SetProgressorPosition
 from arcpy import UpdateCursor
+from Constants import CALCULATE_LOCATIONS_FINISHED
+from Constants import CALCULATE_LOCATIONS_STARTED
+from Constants import EDGE_FEATURE
+from Constants import JUNCTION_FEATURE
 from Constants import POINT_CONVERSION_DONE
+from Constants import SEARCH_TOLERANCE
 from Constants import TOLERANCE
+from Constants import WARNING_NO_EDGE_FEATURE
+from Constants import WARNING_NO_JUNCTION_FEATURE
 from math import sqrt
 from os import remove
 from os import rmdir
@@ -112,6 +122,41 @@ def all_values_in_column(table, column):
   for row in rows:
     values.add(row.getValue(column))
   return values
+
+def network_features(network):
+  """
+  Returns the junction and edge feature names of |network|
+  |network|: a network dataset
+  """
+  edge_feature = None
+  junction_feature = None
+  for source in Describe(network).sources:
+    if source.sourceType == EDGE_FEATURE:
+      edge_feature = source.name
+    elif source.sourceType in JUNCTION_FEATURE:
+      junction_feature = source.name
+  if edge_feature == None:
+    AddWarning(WARNING_NO_EDGE_FEATURE(network))
+    raise Invalid_Input_Exception("Input Network")
+  if junction_feature == None:
+    AddWarning(WARNING_NO_JUNCTION_FEATURE(network))
+    raise Invalid_Input_Exception("Input Network")
+  return (junction_feature, edge_feature)
+
+def calculate_network_locations(points, network):
+  """
+  Computes the locations of |points| in |network|
+  |points|: a feature class (points or polygons)
+  |network|: a network dataset
+  """
+  AddMessage(CALCULATE_LOCATIONS_STARTED)
+  CalculateLocations_na(in_point_features=points,
+      in_network_dataset=network,
+      search_tolerance=SEARCH_TOLERANCE,
+      search_criteria=("%s SHAPE; %s SHAPE;" %
+          network_features(network)),
+      exclude_restricted_elements="INCLUDE")
+  AddMessage(CALCULATE_LOCATIONS_FINISHED)
 
 def eq_tol(a, b):
   """

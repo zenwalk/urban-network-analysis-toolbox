@@ -11,7 +11,8 @@
 Tool validation.
 """
 
-import arcpy
+from arcpy import Describe
+from arcpy import GetParameterInfo
 
 class ToolValidator:
   """
@@ -20,7 +21,7 @@ class ToolValidator:
   """
 
   def __init__(self):
-    params = arcpy.GetParameterInfo()
+    params = GetParameterInfo()
 
     self.inputs = {}
     self.inputs["input_buildings"] = params[0]
@@ -35,11 +36,12 @@ class ToolValidator:
     self.inputs["node_weight_attribute"] = params[9]
     self.inputs["impedance_attribute"] = params[10]
     self.inputs["search_radius"] = params[11]
-    self.inputs["beta"] = params[12]
-    self.inputs["normalize_results"] = params[13]
-    self.inputs["output_location"] = params[14]
-    self.inputs["output_file_name"] = params[15]
-    self.inputs["accumulator_attributes"] = params[16]
+    self.inputs["network_radius"] = params[12]
+    self.inputs["beta"] = params[13]
+    self.inputs["normalize_results"] = params[14]
+    self.inputs["output_location"] = params[15]
+    self.inputs["output_file_name"] = params[16]
+    self.inputs["accumulator_attributes"] = params[17]
 
   def initializeParameters(self):
     """
@@ -56,7 +58,7 @@ class ToolValidator:
     # point_location
     try:
       buildings_type = str(
-          arcpy.Describe(self.inputs["input_buildings"].value).shapeType)
+          Describe(self.inputs["input_buildings"].value).shapeType)
       self.inputs["point_location"].enabled = buildings_type == "Polygon"
     except:
       pass
@@ -71,6 +73,12 @@ class ToolValidator:
           self.reset_network_properties()
     else:
       self.reset_network_properties()
+
+    # network_radius
+    search_radius_entered = self.inputs["search_radius"].value != None
+    if not search_radius_entered:
+        self.inputs["network_radius"].value = False
+    self.inputs["network_radius"].enabled = search_radius_entered
 
     # beta
     self.inputs["beta"].enabled = self.inputs["compute_gravity"].value
@@ -118,7 +126,7 @@ class ToolValidator:
     search_radius = self.inputs["search_radius"]
     if network.altered or impedance.altered:
       try:
-        for attribute in arcpy.Describe(network.value).attributes:
+        for attribute in Describe(network.value).attributes:
           if attribute.name == impedance.value:
             search_radius.setWarningMessage("Units: %s" % attribute.units)
             return
@@ -132,7 +140,7 @@ class ToolValidator:
     """
     impedance = self.inputs["impedance_attribute"]
     accumulators = self.inputs["accumulator_attributes"]
-    description = arcpy.Describe(network.value)
+    description = Describe(network.value)
     defalut_cost_attribute = ""
     cost_attributes = []
     for attribute in description.attributes:

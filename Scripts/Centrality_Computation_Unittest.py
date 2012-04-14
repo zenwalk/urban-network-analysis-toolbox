@@ -63,7 +63,7 @@ class TestReach(unittest.TestCase):
     Test reach at infinite radius
     """
     compute_centrality(self.graph, self.nodes, True, False, False, False, False,
-        INFINITE_RADIUS, 1, [], [])
+        INFINITE_RADIUS, True, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], REACH), 3)
     assert eq_tol(getattr(self.graph["B"], REACH), 3)
     assert eq_tol(getattr(self.graph["C"], REACH), 3)
@@ -73,7 +73,7 @@ class TestReach(unittest.TestCase):
     Test reach at radius 1 - the reach values are no the degrees of the nodes
     """
     compute_centrality(self.graph, self.nodes, True, False, False, False, False,
-        1, 1, [], [])
+        1, True, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], REACH), 2)
     assert eq_tol(getattr(self.graph["B"], REACH), 2)
     assert eq_tol(getattr(self.graph["C"], REACH), 3)
@@ -101,7 +101,7 @@ class TestGravity(unittest.TestCase):
     Test gravity at infinite radius and a beta value of 1
     """
     compute_centrality(self.graph, self.nodes, False, True, False, False, False,
-        INFINITE_RADIUS, 1, [], [])
+        INFINITE_RADIUS, True, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], GRAVITY), 1)
     assert eq_tol(getattr(self.graph["B"], GRAVITY), 1)
     assert eq_tol(getattr(self.graph["C"], GRAVITY), 4.0 / 3)
@@ -128,7 +128,7 @@ class TestBetweenness(unittest.TestCase):
     Test betweenness at infinite radius
     """
     compute_centrality(self.graph, self.nodes, False, False, True, False, False,
-        INFINITE_RADIUS, 1, [], [])
+        INFINITE_RADIUS, True, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], BETWEENNESS), 0)
     assert eq_tol(getattr(self.graph["B"], BETWEENNESS), 0)
     assert eq_tol(getattr(self.graph["C"], BETWEENNESS), 6)
@@ -155,7 +155,7 @@ class TestCloseness(unittest.TestCase):
     Test closeness at infinite radius
     """
     compute_centrality(self.graph, self.nodes, False, False, False, True, False,
-        INFINITE_RADIUS, 1, [], [])
+        INFINITE_RADIUS, True, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], CLOSENESS), 1.0 / 7)
     assert eq_tol(getattr(self.graph["B"], CLOSENESS), 1.0 / 7)
     assert eq_tol(getattr(self.graph["C"], CLOSENESS), 1.0 / 5)
@@ -190,7 +190,7 @@ class TestStraightness(unittest.TestCase):
     Test straightness at infinite radius
     """
     compute_centrality(self.graph, self.nodes, False, False, False, False, True,
-        INFINITE_RADIUS, 1, [], [])
+        INFINITE_RADIUS, True, 1, [], [])
     assert eq_tol(getattr(self.graph["A"], STRAIGHTNESS),
         2 + sqrt(5) / (1 + sqrt(2)))
     assert eq_tol(getattr(self.graph["B"], STRAIGHTNESS),

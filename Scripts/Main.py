@@ -64,6 +64,7 @@ from Constants import NODE_WEIGHT_ATTRIBUTE
 from Constants import NORMALIZE_RESULTS
 from Constants import OD_COST_MATRIX_LAYER_NAME
 from Constants import OD_COST_MATRIX_LINES
+from Constants import ON_THE_NETWORK_OPTION
 from Constants import ORIGIN_ID_FIELD_NAME
 from Constants import ORIGINAL_FID
 from Constants import OUTPUT_FILE_NAME
@@ -147,7 +148,7 @@ inputs[NODE_WEIGHT_ATTRIBUTE] = argv[input_number.next()]
 inputs[IMPEDANCE_ATTRIBUTE] = argv[input_number.next()]
 try: inputs[SEARCH_RADIUS] = float(argv[input_number.next()])
 except: inputs[SEARCH_RADIUS] = INFINITE_RADIUS
-inputs[USE_NETWORK_RADIUS] = argv[input_number.next()] == "true"
+inputs[USE_NETWORK_RADIUS] = argv[input_number.next()] == ON_THE_NETWORK_OPTION
 try: inputs[BETA] = float(argv[input_number.next()])
 except: raise Invalid_Input_Exception("Beta")
 inputs[NORMALIZE_RESULTS] = [measure for measure in

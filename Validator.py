@@ -76,8 +76,6 @@ class ToolValidator:
 
     # network_radius
     search_radius_entered = self.inputs["search_radius"].value != None
-    if not search_radius_entered:
-        self.inputs["network_radius"].value = False
     self.inputs["network_radius"].enabled = search_radius_entered
 
     # beta

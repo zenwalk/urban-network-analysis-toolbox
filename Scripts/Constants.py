@@ -64,6 +64,9 @@ ACCUMULATOR_ATTRIBUTES = input_number.next()
 # Number of inputs
 INPUT_COUNT = input_number.next()
 
+# Network vs. Euclidean radius option
+ON_THE_NETWORK_OPTION = "On the network"
+
 # We convert input buildings to point feature class
 INPUT_POINTS = "INPUT_POINTS"
 # Name of input points after feature to point conversion

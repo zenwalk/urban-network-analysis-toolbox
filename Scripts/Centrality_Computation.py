@@ -152,7 +152,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
             location_w = getattr(nodes[w], LOCATION)
             dist_sw = dist(location_s, location_w)
 
-        if compute and compute_b: b_refresh = False
+        if compute_b: b_refresh = False
 
         add_w_to_Q = False
 
@@ -160,7 +160,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
           if d_sw <= radius or not network_radius:
             add_w_to_Q = True
           d[w] = d_sw
-          if compute and compute_b: b_refresh = True
+          if compute_b: b_refresh = True
 
         elif lt_tol(d_sw, d[w]): # Found a better path from |s| to |w|
           if d_sw <= radius or not network_radius:
@@ -171,7 +171,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
               heapify(Q)
             add_w_to_Q = True
           d[w] = d_sw
-          if compute and compute_b: b_refresh = True
+          if compute_b: b_refresh = True
 
         if add_w_to_Q:
           new_node = (d_sw, w) if network_radius else (d_sw, w, dist_sw)
@@ -180,7 +180,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
             accumulations_s[w] = merge_maps(accumulations_s[v],
                 dict(accumulations_vw), add)
 
-        if compute and compute_b:
+        if compute_b:
           if b_refresh:
             sigma[w] = 0.0
             P[w] = []

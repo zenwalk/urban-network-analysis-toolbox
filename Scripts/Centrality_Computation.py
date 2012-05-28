@@ -67,6 +67,9 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
 
   # Preprocessing
   have_accumulations = len(accumulator_fields) > 0
+  if have_accumulations:
+    empty_accumulations = lambda: dict((field, 0.0) for field in
+        accumulator_fields)
   have_locations = hasattr(nodes.values()[0], LOCATION)
   if compute_s and not have_locations:
     # We cannot compute straightness without node locations
@@ -104,21 +107,29 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
     if compute_c: d_sum_s = 0.0
     if compute_s: straightness_s = 0.0
     if have_accumulations:
-      empty_accumulations = lambda: dict((field, 0.0) for field in
-          accumulator_fields)
       accumulations_s = {s: empty_accumulations()}
 
     d = {s: 0.0} # Shortest distance from |s| to other nodes
     # Queue for Dijkstra
     Q = [(0.0, s)] if network_radius else [(0.0, s, 0.0)]
 
+    # If we use euclidean radius, make a list of all reachable nodes
+    if not network_radius:
+      reachable_s = set()
+      for t in nodes:
+        location_t = getattr(nodes[t], LOCATION)
+        if dist(location_s, location_t) <= radius:
+          reachable_s.add(t)
+
     # Dijkstra
-    while Q:
+    while (Q if network_radius else reachable_s):
       # Pop the closest node to |s| from |Q|
       if network_radius:
         d_sv, v = heappop(Q)
       else:
         d_sv, v, dist_sv = heappop(Q)
+        if v in reachable_s:
+          reachable_s.remove(v)
       weight_v = getattr(nodes[v], WEIGHT)
       if have_locations: location_v = getattr(nodes[v], LOCATION)
 

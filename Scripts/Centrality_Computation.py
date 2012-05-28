@@ -82,6 +82,8 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
   # Computation
   progress = Progress_Bar(O, 1, STEP_4)
   for s in origins:
+    if s not in nodes:
+      continue
     weight_s = getattr(nodes[s], WEIGHT)
     if have_locations: location_s = getattr(nodes[s], LOCATION)
 
@@ -107,57 +109,67 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
       accumulations_s = {s: empty_accumulations()}
 
     d = {s: 0.0} # Shortest distance from |s| to other nodes
-    Q = [(0.0, s)] # Queue for Dijkstra
+    # Queue for Dijkstra
+    Q = [(0.0, s)] if network_radius else [(0.0, s, 0.0)]
 
     # Dijkstra
     while Q:
       # Pop the closest node to |s| from |Q|
-      d_sv, v = heappop(Q)
+      if network_radius:
+        d_sv, v = heappop(Q)
+      else:
+        d_sv, v, dist_sv = heappop(Q)
       weight_v = getattr(nodes[v], WEIGHT)
       if have_locations: location_v = getattr(nodes[v], LOCATION)
 
-      reach_s += 1
-      weighted_reach_s += weight_v
-
-      if d_sv > 0:
-        if compute_g: gravity_s += weight_v * exp(-d_sv * beta)
-        if compute_c: d_sum_s += weight_v * d_sv
-        if compute_s: straightness_s += (weight_v * dist(location_s, location_v)
-            / d_sv)
-      if compute_b: S.append(v)
+      compute = network_radius or dist_sv <= radius
+      if compute:
+        reach_s += 1
+        weighted_reach_s += weight_v
+        if d_sv > 0:
+          if compute_g: gravity_s += weight_v * exp(-d_sv * beta)
+          if compute_c: d_sum_s += weight_v * d_sv
+          if compute_s: straightness_s += (weight_v *
+              dist(location_s, location_v) / d_sv)
+        if compute_b: S.append(v)
 
       for w, d_vw, accumulations_vw in getattr(nodes[v], NEIGHBORS):
         # s ~ ... ~ v ~ w
         d_sw = d_sv + d_vw
-        enqueue_sw = d_sw
         if not network_radius:
+            # Use Euclidean distance
             location_w = getattr(nodes[w], LOCATION)
-            enqueue_sw = dist(location_s, location_w) # Use Euclidean distance
+            dist_sw = dist(location_s, location_w)
 
-        if compute_b: b_refresh = False
+        if compute and compute_b: b_refresh = False
+
+        add_w_to_Q = False
 
         if not w in d: # Found a path from |s| to |w| for the first time
-          if enqueue_sw <= radius:
-            heappush(Q, (d_sw, w)) # Add |w| to |Q|
-            if have_accumulations:
-              accumulations_s[w] = merge_maps(accumulations_s[v],
-                  dict(accumulations_vw), add)
+          if d_sw <= radius or not network_radius:
+            add_w_to_Q = True
           d[w] = d_sw
-          if compute_b: b_refresh = True
+          if compute and compute_b: b_refresh = True
 
         elif lt_tol(d_sw, d[w]): # Found a better path from |s| to |w|
-          if enqueue_sw <= radius:
-            if d[w] <= radius:
-              Q.remove((d[w], w))
+          if d_sw <= radius or not network_radius:
+            if d[w] <= radius or not network_radius:
+              longer_path_node = (d[w], w) if network_radius else (d[w], w,
+                  dist_sw)
+              Q.remove(longer_path_node)
               heapify(Q)
-            heappush(Q, (d_sw, w)) # Add |w| to |Q|
-            if have_accumulations:
-              accumulations_s[w] = merge_maps(accumulations_s[v],
-                  dict(accumulations_vw), add)
+            add_w_to_Q = True
           d[w] = d_sw
-          if compute_b: b_refresh = True
+          if compute and compute_b: b_refresh = True
 
-        if compute_b:
+        if add_w_to_Q:
+          new_node = (d_sw, w) if network_radius else (d_sw, w, dist_sw)
+          heappush(Q, new_node)
+          if have_accumulations:
+            accumulations_s[w] = merge_maps(accumulations_s[v],
+                dict(accumulations_vw), add)
+
+        if compute and compute_b:
           if b_refresh:
             sigma[w] = 0.0
             P[w] = []
@@ -202,6 +214,8 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
   if measures_to_normalize:
     norm_progress = Progress_Bar(O, 1, PROGRESS_NORMALIZATION)
     for s in origins:
+      if s not in nodes:
+        continue
       reach_s = nodes[s].reach
       weighted_reach_s = nodes[s].weighted_reach
 

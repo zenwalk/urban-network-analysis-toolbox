@@ -122,7 +122,7 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
           reachable_s.add(t)
 
     # Dijkstra
-    while (Q if network_radius else reachable_s):
+    while Q and (True if network_radius else reachable_s):
       # Pop the closest node to |s| from |Q|
       if network_radius:
         d_sv, v = heappop(Q)

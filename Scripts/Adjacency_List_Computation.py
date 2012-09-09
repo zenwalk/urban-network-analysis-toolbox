@@ -55,6 +55,7 @@ from Constants import RASTER_NAME
 from Constants import SEARCH_TOLERANCE
 from Constants import SNAP_OFFSET
 from Constants import STEP_1
+from Constants import TEMP_ADJACENCY_DBF_NAME
 from math import sqrt
 from os import mkdir
 from os.path import join
@@ -142,7 +143,7 @@ def compute_adjacency_list(input_points, input_network, id_attribute,
   # Necessary files
   od_cost_matrix_layer = join(auxiliary_dir, OD_COST_MATRIX_LAYER_NAME)
   od_cost_matrix_lines = join(od_cost_matrix_layer, OD_COST_MATRIX_LINES)
-  temp_adj_dbf_name = "%s~.dbf" % adj_dbf_name[:-4]
+  temp_adj_dbf_name = TEMP_ADJACENCY_DBF_NAME(adj_dbf_name)
   temp_adj_dbf = join(output_location, temp_adj_dbf_name)
   adj_dbf = join(output_location, adj_dbf_name)
   partial_adj_dbf = join(auxiliary_dir, PARTIAL_ADJACENCY_LIST_NAME)

@@ -174,7 +174,7 @@ node_locations_needed = (inputs[COMPUTE_STRAIGHTNESS] or
 adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
     basename(inputs[INPUT_BUILDINGS]), basename(inputs[INPUT_NETWORK]),
     inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
-    inputs[ACCUMULATOR_ATTRIBUTES]))
+    inputs[ACCUMULATOR_ATTRIBUTES])).replace("#", "None")
 adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
 # Output file names

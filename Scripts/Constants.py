@@ -198,12 +198,13 @@ SYMBOLOGY_DIR = join(SCRIPT_PARENT_DIR, SYMBOLOGY_DIR_NAME)
 ADJACENCY_LIST_NAME = "Adjacency_List"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
 OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")
+OD_COST_MATRIX_LINES = "Lines"
+TEMP_ADJACENCY_DBF_NAME = lambda adj_dbf_name: "Temp_%s" % adj_dbf_name
 POLYGONS_SHAPEFILE_NAME = "Polygons.shp"
 PARTIAL_ADJACENCY_LIST_NAME = "Partial_Adjacency_List.dbf"
 POLYGONS_LAYER_NAME = layer_name("Polygons")
 RASTER_NAME = "Raster"
 INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
-OD_COST_MATRIX_LINES = "Lines"
 
 # Name of the column that stores the original FID of polygons when converting to
 #     points

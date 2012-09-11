@@ -23,25 +23,24 @@ class ToolValidator:
   def __init__(self):
     params = GetParameterInfo()
 
-    self.inputs = {}
-    self.inputs["input_buildings"] = params[0]
-    self.inputs["point_location"] = params[1]
-    self.inputs["input_network"] = params[2]
-    self.inputs["compute_reach"] = params[3]
-    self.inputs["compute_gravity"] = params[4]
-    self.inputs["compute_betweenness"] = params[5]
-    self.inputs["compute_closeness"] = params[6]
-    self.inputs["compute_straightness"] = params[7]
-    self.inputs["id_attribute"] = params[8]
-    self.inputs["node_weight_attribute"] = params[9]
-    self.inputs["impedance_attribute"] = params[10]
-    self.inputs["search_radius"] = params[11]
-    self.inputs["network_radius"] = params[12]
-    self.inputs["beta"] = params[13]
-    self.inputs["normalize_results"] = params[14]
-    self.inputs["output_location"] = params[15]
-    self.inputs["output_file_name"] = params[16]
-    self.inputs["accumulator_attributes"] = params[17]
+    self.inputs = {"input_buildings": params[0],
+                   "point_location": params[1],
+                   "input_network": params[2],
+                   "compute_reach": params[3],
+                   "compute_gravity": params[4],
+                   "compute_betweenness": params[5],
+                   "compute_closeness": params[6],
+                   "compute_straightness": params[7],
+                   "id_attribute": params[8],
+                   "node_weight_attribute": params[9],
+                   "impedance_attribute": params[10],
+                   "search_radius": params[11],
+                   "network_radius": params[12],
+                   "beta": params[13],
+                   "normalize_results": params[14],
+                   "output_location": params[15],
+                   "output_file_name": params[16],
+                   "accumulator_attributes": params[17]}
 
   def initializeParameters(self):
     """

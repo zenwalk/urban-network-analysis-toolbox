@@ -59,6 +59,7 @@ from Constants import INPUT_POINTS
 from Constants import INPUT_POINTS_LAYER_NAME
 from Constants import layer_name
 from Constants import LOCATION
+from Constants import MAX_FILE_NAME_LENGTH
 from Constants import METRICS
 from Constants import NODE_WEIGHT_ATTRIBUTE
 from Constants import NORMALIZE_RESULTS
@@ -105,6 +106,7 @@ from Constants import symbology_layer_name
 from Constants import USE_NETWORK_RADIUS
 from Constants import WARNING_APPLY_SYMBOLOGY_FAILED
 from Constants import WARNING_FAIL_TO_DISPLAY
+from Constants import WARNING_LARGE_ADJ_FILE_NAME
 from Constants import WARNING_NO_NODES
 from Constants import WARNING_OUTPUT_ALREADY_EXISTS
 from Constants import WARNING_POINTS_NOT_IN_GRAPH
@@ -174,7 +176,9 @@ node_locations_needed = (inputs[COMPUTE_STRAIGHTNESS] or
 adj_dbf_name = ("%s_%s_%s_%s_%s_%s.dbf" % (ADJACENCY_LIST_NAME,
     basename(inputs[INPUT_BUILDINGS]), basename(inputs[INPUT_NETWORK]),
     inputs[ID_ATTRIBUTE], inputs[IMPEDANCE_ATTRIBUTE],
-    inputs[ACCUMULATOR_ATTRIBUTES])).replace("#", "-")
+    inputs[ACCUMULATOR_ATTRIBUTES])).replace("#", "None")
+if len(adj_dbf_name) > MAX_FILE_NAME_LENGTH:
+  AddWarning(WARNING_LARGE_ADJ_FILE_NAME)
 adj_dbf = join(inputs[OUTPUT_LOCATION], adj_dbf_name)
 
 # Output file names

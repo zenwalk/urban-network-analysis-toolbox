@@ -21,9 +21,7 @@ from sys import path
 SCRIPT_DIR = path[0]
 SCRIPT_PARENT_DIR = abspath(join(SCRIPT_DIR, pardir))
 
-"""
-The six steps of the tool
-"""
+# The six steps of the tool
 STEP_1 = "Computing adjacency list"
 STEP_2 = "Building graph from adjacency list"
 STEP_3 = "Retrieving necessary node attributes"
@@ -31,9 +29,8 @@ STEP_4 = "Running centrality computation"
 STEP_5 = "Writing out results"
 STEP_6 = "Displaying results"
 
-"""
-Inputs to the tool
-"""
+
+# Inputs to the tool
 # Denote each input by its index
 def index():
   i = 0
@@ -73,17 +70,16 @@ INPUT_POINTS = "INPUT_POINTS"
 POINT_FEATURE_CLASS_NAME = lambda feature_class_name, point_location: (
     ("%s_%s_FeatureToPoint" % (feature_class_name, point_location)))
 
-"""
-Console messages
-"""
+# Console messages
 INPUT_BUILDINGS_COPY_STARTED = "[started] Copying input buildings"
 INPUT_BUILDINGS_COPY_FINISHED = "[finished]"
 INPUT_BUILDINGS_COPY_FAILED = "[failed]"
 
 PROGRESS_NORMALIZATION = "Normalizing results"
 
+WARNING_LARGE_ADJ_FILE_NAME = ("Adjacency list DBF name is too large, "
+    "please rerun with shorter input file names")
 WARNING_OUTPUT_ALREADY_EXISTS = "Output with the same name already exists"
-
 WARNING_NO_EDGE_FEATURE = lambda input_network: ("%s does not have edge feature"
     % input_network)
 WARNING_NO_JUNCTION_FEATURE = lambda input_network: ("%s does not have junction"
@@ -142,9 +138,7 @@ STEP_6_FINISHED = "[6 finished]"
 SUCCESS = "Successful!"
 FAILURE = "Not successful"
 
-"""
-Node attribute names
-"""
+# Node attribute names
 NEIGHBORS = "Neighbors"
 LOCATION = "Location"
 WEIGHT = "Weight"
@@ -165,9 +159,7 @@ NORM_METRICS = (NORM_REACH, NORM_GRAVITY, NORM_BETWEENNESS, NORM_CLOSENESS,
     NORM_STRAIGHTNESS)
 FINAL_ATTRIBUTES = METRICS + NORM_METRICS
 
-"""
-Constants for adjacency list computation
-"""
+# Constants for adjacency list computation
 # Network feature type identifiers
 EDGE_FEATURE = "EdgeFeature"
 JUNCTION_FEATURE = ("JunctionFeature", "SystemJunction")
@@ -210,12 +202,11 @@ INPUT_POINTS_LAYER_NAME = layer_name("Input_Points")
 #     points
 ORIGINAL_FID = "ORIG_FID"
 
-"""
-Representation for an infinite radius (or infinite extent on the network)
-"""
+# Largest allowed length of a file name
+MAX_FILE_NAME_LENGTH = 160
+
+# Representation for an infinite radius (or infinite extent on the network)
 INFINITE_RADIUS = maxint
 
-"""
-Tolerance for inequality (if abs(a - b) <= |TOLERANCE|, consider a and b equal)
-"""
+# Tolerance for inequality (if abs(a - b) <= |TOLERANCE|, consider a and b equal)
 TOLERANCE = 0.000001

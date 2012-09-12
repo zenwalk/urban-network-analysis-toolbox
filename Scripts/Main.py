@@ -380,7 +380,11 @@ try:
       SaveToLayerFile_management(output_layer_name, output_layer,
           "ABSOLUTE")
       # Use a test node to figure out which metrics were computed
-      test_node = nodes[selected_features.pop()]
+      test_node_id = selected_features.pop()
+      # Make sure the test node is in the graph
+      while test_node_id not in nodes:
+        test_node_id = selected_features.pop()
+      test_node = nodes[test_node_id]
       measures = set([measure for measure in dir(test_node) if (measure in
           FINAL_ATTRIBUTES or is_accumulator_field(measure))])
       # Add a field in the output layer for each computed metric

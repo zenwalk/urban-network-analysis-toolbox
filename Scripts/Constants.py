@@ -195,7 +195,7 @@ symbology_layer_name= lambda shape_type, first_metric: (
     "%s_%s_Symbology_Layer.lyr" % (shape_type, first_metric))
 SYMBOLOGY_DIR_NAME = "Symbology_Layers"
 SYMBOLOGY_DIR = join(SCRIPT_PARENT_DIR, SYMBOLOGY_DIR_NAME)
-ADJACENCY_LIST_NAME = "Adjacency_List"
+ADJACENCY_LIST_NAME = "Adj"
 AUXILIARY_DIR_NAME = "Auxiliary_Files"
 OD_COST_MATRIX_LAYER_NAME = layer_name("OD_Cost_Matrix")
 OD_COST_MATRIX_LINES = "Lines"

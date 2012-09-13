@@ -49,10 +49,13 @@ class Invalid_Input_Exception(Exception):
     """
     |input_name|: the name of the invalid input
     """
-    self.input_name = input_name
+    Exception.__init__(self, "Invalid Input: %s" % input_name)
 
-  def __str__(self):
-    return "Invalid Input: %s" % self.input_name
+class Invalid_Parameters_Exception(Exception):
+  """
+  Exception thrown when parameters to a method are invalid
+  """
+  pass
 
 class Progress_Bar:
   """

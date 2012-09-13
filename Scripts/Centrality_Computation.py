@@ -35,6 +35,7 @@ from math import exp
 from operator import add
 from Utils import dist
 from Utils import eq_tol
+from Utils import Invalid_Parameters_Exception
 from Utils import lt_tol
 from Utils import merge_maps
 from Utils import Progress_Bar
@@ -62,7 +63,9 @@ def compute_centrality(nodes, origins, compute_r, compute_g, compute_b,
   # Number of nodes in the graph
   N = len(nodes)
   O = len(origins)
-  if N == 0 or O == 0:
+  if O > N:
+    raise Invalid_Parameters_Exception("size of origins exceeds size of nodes")
+  elif O == 0:
     return
 
   # Preprocessing

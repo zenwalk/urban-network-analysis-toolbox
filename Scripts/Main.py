@@ -28,6 +28,7 @@ from arcpy import MakeFeatureLayer_management
 from arcpy import mapping
 from arcpy import SaveToLayerFile_management
 from arcpy import SelectLayerByAttribute_management
+from arcpy import SetParameterAsText
 from arcpy import UpdateCursor
 from Adjacency_List_Computation import compute_adjacency_list
 from Centrality_Computation import compute_centrality
@@ -68,6 +69,7 @@ from Constants import OD_COST_MATRIX_LINES
 from Constants import ON_THE_NETWORK_OPTION
 from Constants import ORIGIN_ID_FIELD_NAME
 from Constants import ORIGINAL_FID
+from Constants import OUTPUT_FEATURE_CLASS
 from Constants import OUTPUT_FILE_NAME
 from Constants import OUTPUT_LOCATION
 from Constants import PARTIAL_ADJACENCY_LIST_NAME
@@ -216,8 +218,8 @@ elif buildings_description.shapeType == "Polygon":
       basename(output_feature_class), inputs[POINT_LOCATION])
   inputs[INPUT_POINTS] = "%s.shp" % join(inputs[OUTPUT_LOCATION],
       point_feature_class_name)
-  # If FID is used as ID attribute, we need to change it since a point shapefile
-  #     will be in use
+  # If FID is used as ID attribute, we need to change it since a point
+  #     shapefile will be in use
   if inputs[ID_ATTRIBUTE] == "FID":
     inputs[ID_ATTRIBUTE] = ORIGINAL_FID
 else:
@@ -447,8 +449,11 @@ try:
   # Clean up
   clean_up()
 
-  if success: AddMessage(SUCCESS)
-  else: AddMessage(FAILURE)
+  if success:
+    SetParameterAsText(OUTPUT_FEATURE_CLASS, output_feature_class)
+    AddMessage(SUCCESS)
+  else:
+    AddMessage(FAILURE)
 
 except ExecuteAbort:
   clean_up()

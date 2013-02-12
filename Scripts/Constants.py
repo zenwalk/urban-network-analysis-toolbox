@@ -29,7 +29,6 @@ STEP_4 = "Running centrality computation"
 STEP_5 = "Writing out results"
 STEP_6 = "Displaying results"
 
-
 # Inputs to the tool
 # Denote each input by its index
 def index():
@@ -57,6 +56,7 @@ NORMALIZE_RESULTS = input_number.next()
 OUTPUT_LOCATION = input_number.next()
 OUTPUT_FILE_NAME = input_number.next()
 ACCUMULATOR_ATTRIBUTES = input_number.next()
+OUTPUT_FEATURE_CLASS = input_number.next()
 
 # Number of inputs
 INPUT_COUNT = input_number.next()

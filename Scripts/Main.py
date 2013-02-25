@@ -416,6 +416,8 @@ try:
             row.setValue(trim(measure), value)
           layer_rows.updateRow(row)
           write_progress.step()
+      # Save to toolbox output
+      SetParameterAsText(OUTPUT_FEATURE_CLASS, output_feature_class)
       AddMessage(STEP_5_FINISHED)
     except:
       AddWarning(GetMessages(2))
@@ -449,11 +451,7 @@ try:
   # Clean up
   clean_up()
 
-  if success:
-    SetParameterAsText(OUTPUT_FEATURE_CLASS, output_feature_class)
-    AddMessage(SUCCESS)
-  else:
-    AddMessage(FAILURE)
+  AddMessage(SUCCESS if success else FAILURE)
 
 except ExecuteAbort:
   clean_up()
